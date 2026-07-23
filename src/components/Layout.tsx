@@ -1,8 +1,9 @@
 import { Outlet } from "react-router-dom"
 import { Sidebar } from "@/components/Sidebar"
 import { Header } from "@/components/Header"
+import { TransactionProvider } from "@/data/context/TransactionContext"
 
-export function Layout() {
+export default function Layout() {
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-gray-50">
@@ -15,7 +16,9 @@ export function Layout() {
                 <Header />
                 {/* Conteúdo Principal */}
                 <main className="flex-1 overflow-y-auto p-6">
-                    <Outlet />
+                    <TransactionProvider>
+                        <Outlet />
+                    </TransactionProvider>
                 </main>
             </div>
         </div>
