@@ -1,14 +1,26 @@
-import Header from "@/components/Header"
-import { Button } from "./components/ui/button"
+import Layout from "@/components/Layout"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Dashboard from "./pages/Dashboard/Index"
+import Lancamentos from "./pages/Lancamentos"
+
+const Departamentos = () => <div>Tela Departamento</div>
+const Categorias = () => <div>Tela Categorias</div>
+const Dashboard2 = () => <div>Dashboard2</div>
 
 function App() {
   return (
-    <div className="p-8">
-      <Header />
-      <Button variant={"secondary"}>Click</Button>
-      <Button variant={"destructive"}>Click</Button>
-      <h1 className="text-3x1 font-bold text-blue-600">FinControl</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route path="dashboard" element={<Dashboard />}/>
+          <Route path="/dashboard/dashboard2" element={<Dashboard2/>}/>
+          <Route path="lancamentos" element={<Lancamentos />} />
+          <Route path="departamentos" element={<Departamentos />} />
+          <Route path="categorias" element={<Categorias />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+
   )
 }
 
