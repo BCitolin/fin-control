@@ -2,6 +2,7 @@ import Layout from "@/components/Layout"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Dashboard from "./pages/Dashboard/Index"
 import Lancamentos from "./pages/Lancamentos"
+import {Toaster} from "sonner"
 
 const Departamentos = () => <div>Tela Departamento</div>
 const Categorias = () => <div>Tela Categorias</div>

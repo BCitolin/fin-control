@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom"
 import { Sidebar } from "@/components/Sidebar"
 import { Header } from "@/components/Header"
 import { TransactionProvider } from "@/data/context/TransactionContext"
+import {Toaster} from "sonner"
 
 export default function Layout() {
 
@@ -21,6 +22,7 @@ export default function Layout() {
                     </TransactionProvider>
                 </main>
             </div>
+            <Toaster position="top-right" richColors/>
         </div>
     )
 }
