@@ -11,9 +11,16 @@ export function formatCurrency(value: number, type: string) {
 
 }
 
-export function formatDate(dateString: string) {
-    const [year, month, day] = dateString.split('-').map(Number)
-    const date = new Date(year, month - 1, day)
+export function maskCurrency(value: string) :string {
+    const cleanValue = value.replace(/\D/g, "")
 
-    return new Intl.DateTimeFormat('pt-BR').format(date)
+    if(!cleanValue) return ""
+
+    const numberValue = Number(cleanValue)/100
+
+    return new Intl.NumberFormat("pt-BR", {style: 'currency', currency:'BRL'}).format(numberValue)
+}
+
+export function formatDate(date: Date) {
+    return new Intl.DateTimeFormat('pt-BR').format(date);
 }
