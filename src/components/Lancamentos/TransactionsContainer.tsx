@@ -7,7 +7,7 @@ export default function TransactionsContainer() {
         <div className="w-full space-y-6">
             <div className="flex justify-between">
                 <h1 className="text-gray-800 text-lg font-semibold">Página de lançamentos</h1>
-                <CreateTransactionDialog />
+                <CreateTransactionDialog/>
             </div>
             
             {/* Barra de filtros */}

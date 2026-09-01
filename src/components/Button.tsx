@@ -16,7 +16,7 @@ export default function Button({isLoading, loadingMessage, children, ...props}: 
                         <Spinner/>    
                     </ButtonUI>
                 ) : (
-                <ButtonUI {...props}>
+                <ButtonUI {...props} className="cursor-pointer">
                     {children}
                 </ButtonUI>
             )}

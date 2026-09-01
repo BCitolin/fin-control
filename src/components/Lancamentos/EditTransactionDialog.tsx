@@ -5,8 +5,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+    DialogTitle
 } from "@/components/ui/dialog"
 import Button from "@/components/Button"
 import { Field, FieldContent, FieldGroup } from "../ui/field"
@@ -28,68 +27,77 @@ import {
 } from "@/components/ui/select"
 import { maskCurrency } from "@/utils/Formater"
 import { CATEGORIES } from "@/constants/categories"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { DEPARTMENTS } from "@/constants/departments"
 import { toast } from "sonner"
 import { Textarea } from "../ui/textarea"
-import { useTransaction, type TransactionFormErrors } from "@/data/context/TransactionContext"
+import { useTransaction } from "@/data/context/TransactionContext"
+import type { Transaction, TransactionFormErrors } from "@/data/context/TransactionContext"
 
-interface InitialValuesType {
-    date: Date | undefined,
-    type: "INCOME" | "EXPENSE",
-    category: string | null,
-    description: string,
-    amount: string,
-    department: string | null
+
+interface EditTransactionDialogProps{
+    transaction: Transaction
+    open: boolean;
+    handleModalClose: () => void;    
 }
 
-const initialValues: InitialValuesType = {
-    date: undefined,
-    type: "INCOME",
-    category: "",
-    description: "",
-    amount: "",
-    department: ""
+interface formFields{
+    date: Date | undefined;
+    category: string;
+    type: 'INCOME' | 'EXPENSE';
+    amount: string;
+    description: string;
+    department: string;
 }
 
-const initialErrors: TransactionFormErrors = {
-    type: "",
-    amount: "",
-    data: "",
-    department: "",
-    description: "",
-    category: ""
-}
 
-export default function CreateTransactionDialog() {
-    const { addTransaction } = useTransaction();
-    const [errors, setErrors] = useState<TransactionFormErrors>({})
-    const [formFields, setFormFields] = useState(initialValues)
-    const [open, setOpen] = useState(false)
+
+export default function EditTransactionDialog({transaction, open, handleModalClose}: EditTransactionDialogProps){
+
+    const { editTransaction } = useTransaction()
+
+    const [formFields, setFormFields] = useState<formFields>({
+        date: undefined,
+        category: "",
+        amount: "",
+        department: "",
+        description: "",
+        type: "INCOME"
+    })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+    const [errors, setErrors] = useState<TransactionFormErrors>({})
+
+    useEffect(()=>{
+        if(transaction && open){
+            setFormFields({
+                date: new Date(transaction.date),
+                category: transaction.category,
+                amount: maskCurrency((transaction.amount as number*100).toString()),
+                department: transaction.department,
+                description: transaction.description,
+                type: transaction.type
+            })
+        }
+    },[transaction, open])
+    // array de dependencia
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formattedValue = maskCurrency(e.target.value)
         setFormFields(prevFields => ({ ...prevFields, amount: formattedValue }))
     }
-
+    
     const handleTypeChange = (newType: "INCOME" | "EXPENSE") => {
         setFormFields(prevFields => ({ ...prevFields, type: newType, category: "" }))
     }
-
+    
     function handleDescription(value: string) {
         setFormFields(prevFields => {
             return value.length <= 200 ? { ...prevFields, description: value } : { ...prevFields }
         })
     }
 
-    const handleOpenChange = (isOpen: boolean) => {
-        setOpen(isOpen)
-        setFormFields(initialValues)
-        setErrors(initialErrors)
-    }
-
+    
     function validate() {
         const newErrors: TransactionFormErrors = {}
 
@@ -123,7 +131,7 @@ export default function CreateTransactionDialog() {
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
-
+    
     function validateOnBlur(fieldName: keyof TransactionFormErrors) {
         setErrors((prevErrors) => {
             const newErrors = { ...prevErrors }
@@ -149,9 +157,9 @@ export default function CreateTransactionDialog() {
             return newErrors
         })
     }
-
+    
     async function handleSubmit(e: React.SubmitEvent) {
-        e.preventDefault()
+        e.preventDefault() //Não deixa a tela recarregar no envio do formulário
         const isValid = validate()
 
         if (!isValid) return;
@@ -162,8 +170,8 @@ export default function CreateTransactionDialog() {
             await new Promise((resolve) => setTimeout(resolve, 3000))
             const payload = {
                 ...formFields,
-                id: crypto.randomUUID(),
-                createdAt: new Date(),
+                id: transaction.id,
+                createdAt: transaction.createdAt,
                 amount: Number(formFields.amount.replace(/\D/g, "")) / 100,
                 date: formFields.date as Date,
                 category: formFields.category as string,
@@ -171,21 +179,21 @@ export default function CreateTransactionDialog() {
                 //casting
             }
 
-            await addTransaction(payload)
+            await editTransaction(payload)
 
-            toast.success("Lançamento criado com sucesso")
-            setOpen(false)
+            toast.success("Lançamento atualizado com sucesso")
+            handleModalClose()
 
         } catch (error) {
-            toast.error("Falha ao criar lançamento")
+            toast.error("Falha ao salvar lançamento")
         } finally {
             setIsSubmitting(false)
         }
     }
 
-    return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger render={<Button className="cursor-pointer" variant="outline">Novo Lançamento</Button>} />
+
+    return(
+        <Dialog open={open} onOpenChange={handleModalClose}>
             <DialogContent className="sm:max-w-200">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
@@ -291,7 +299,7 @@ export default function CreateTransactionDialog() {
                                 <Label htmlFor="categoria">Categoria:<span className="text-red-800">*</span></Label>
                                 <Select
                                     value={formFields.category}
-                                    onValueChange={(category) => setFormFields(prevFields => ({ ...prevFields, category: category }))}
+                                    onValueChange={(category) => setFormFields(prevFields => ({ ...prevFields, category: category as string }))}
                                 >
                                     <SelectTrigger id="categoria" className={errors.category ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
@@ -312,7 +320,7 @@ export default function CreateTransactionDialog() {
                                 <Label htmlFor="departamento">Departamento:<span className="text-red-800">*</span></Label>
                                 <Select
                                     value={formFields.department}
-                                    onValueChange={(department) => setFormFields(prevFields => ({ ...prevFields, department: department }))}
+                                    onValueChange={(department) => setFormFields(prevFields => ({ ...prevFields, department: department as string }))}
                                 >
                                     <SelectTrigger className={errors.department ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
