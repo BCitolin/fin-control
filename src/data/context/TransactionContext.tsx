@@ -49,7 +49,7 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
             prev.filter(t => t.id !== payload.id)
         )
     }
-
+    
     return (
         <TransactionContext.Provider value={{ transactions, addTransaction, editTransaction, deleteTransaction }}>
             {children}

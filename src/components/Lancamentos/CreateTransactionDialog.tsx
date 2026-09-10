@@ -61,7 +61,11 @@ const initialErrors: TransactionFormErrors = {
     category: ""
 }
 
-export default function CreateTransactionDialog() {
+interface dialogTriggerStyle{
+    dialogTriggerStyle?: string
+}
+
+export default function CreateTransactionDialog({dialogTriggerStyle}: dialogTriggerStyle) {
     const { addTransaction } = useTransaction();
     const [errors, setErrors] = useState<TransactionFormErrors>({})
     const [formFields, setFormFields] = useState(initialValues)
@@ -185,7 +189,7 @@ export default function CreateTransactionDialog() {
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger render={<Button className="cursor-pointer" variant="outline">Novo Lançamento</Button>} />
+            <DialogTrigger render={<Button className={dialogTriggerStyle} variant="outline">Novo Lançamento</Button>} />
             <DialogContent className="sm:max-w-200">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
@@ -332,12 +336,13 @@ export default function CreateTransactionDialog() {
                     </FieldGroup>
 
                     <DialogFooter className="sm:justify-between">
-                        <DialogClose render={<Button variant="outline">Cancelar</Button>} />
+                        <DialogClose render={<Button className="cursor-pointer" variant="outline">Cancelar</Button>} />
                         <Button
                             type="submit"
                             disabled={isSubmitting}
                             isLoading={isSubmitting}
                             loadingMessage="Salvando..."
+                            className="cursor-pointer"
                         >
                             Salvar
                         </Button>

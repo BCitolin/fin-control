@@ -58,7 +58,7 @@ export default function DeleteTransactionDialog({ transaction, open, handleModal
             </DialogHeader>
           </div>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
+            <DialogClose render={<Button className="cursor-pointer" variant="outline" />}>
               Cancelar
             </DialogClose>
             <Button
@@ -67,6 +67,7 @@ export default function DeleteTransactionDialog({ transaction, open, handleModal
               isLoading={isSubmitting}
               loadingMessage="Excluindo..."
               disabled={isSubmitting}
+              className="cursor-pointer"
             >
               Excluir
             </Button>

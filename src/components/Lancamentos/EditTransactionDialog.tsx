@@ -340,12 +340,13 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                     </FieldGroup>
 
                     <DialogFooter className="sm:justify-between">
-                        <DialogClose render={<Button variant="outline">Cancelar</Button>} />
+                        <DialogClose render={<Button className="cursor-pointer" variant="outline">Cancelar</Button>} />
                         <Button
                             type="submit"
                             disabled={isSubmitting}
                             isLoading={isSubmitting}
                             loadingMessage="Salvando..."
+                            className="cursor-pointer"
                         >
                             Salvar
                         </Button>
