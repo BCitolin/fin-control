@@ -25,14 +25,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { maskCurrency } from "@/utils/Formater"
 import { CATEGORIES } from "@/constants/categories"
-import React, { useEffect, useState } from "react"
 import { DEPARTMENTS } from "@/constants/departments"
-import { toast } from "sonner"
 import { Textarea } from "../ui/textarea"
-import { useTransaction } from "@/data/context/TransactionContext"
-import type { Transaction, TransactionFormErrors } from "@/data/context/TransactionContext"
+import type { Transaction } from "@/data/context/TransactionContext"
+import { useTransactionForm } from "@/hooks/useTransactionForm"
 
 
 interface EditTransactionDialogProps{
@@ -41,161 +38,29 @@ interface EditTransactionDialogProps{
     handleModalClose: () => void;    
 }
 
-interface formFields{
-    date: Date | undefined;
-    category: string;
-    type: 'INCOME' | 'EXPENSE';
-    amount: string;
-    description: string;
-    department: string;
-}
-
-
-
 export default function EditTransactionDialog({transaction, open, handleModalClose}: EditTransactionDialogProps){
 
-    const { editTransaction } = useTransaction()
-
-    const [formFields, setFormFields] = useState<formFields>({
-        date: undefined,
-        category: "",
-        amount: "",
-        department: "",
-        description: "",
-        type: "INCOME"
-    })
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
-    const [errors, setErrors] = useState<TransactionFormErrors>({})
-
-    useEffect(()=>{
-        if(transaction && open){
-            setFormFields({
-                date: new Date(transaction.date),
-                category: transaction.category,
-                amount: maskCurrency((transaction.amount as number*100).toString()),
-                department: transaction.department,
-                description: transaction.description,
-                type: transaction.type
-            })
-        }
-    },[transaction, open])
-    // array de dependencia
-
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const formattedValue = maskCurrency(e.target.value)
-        setFormFields(prevFields => ({ ...prevFields, amount: formattedValue }))
-    }
-    
-    const handleTypeChange = (newType: "INCOME" | "EXPENSE") => {
-        setFormFields(prevFields => ({ ...prevFields, type: newType, category: "" }))
-    }
-    
-    function handleDescription(value: string) {
-        setFormFields(prevFields => {
-            return value.length <= 200 ? { ...prevFields, description: value } : { ...prevFields }
-        })
-    }
-
-    
-    function validate() {
-        const newErrors: TransactionFormErrors = {}
-
-        if (!formFields.type) {
-            newErrors.type = "O tipo do lançamento é obrigatório."
-        }
-
-        const numericAmount = Number(formFields.amount.replace(/\D/g, "")) / 100
-        if (!formFields.amount || numericAmount <= 0) {
-            newErrors.amount = "O valor deve ser maior que 0."
-        }
-
-        if (!formFields.date) {
-            newErrors.data = "A data é obrigatória"
-        }
-
-        if (!formFields.description.trim()) {
-            newErrors.description = "A descrição é obrigatória"
-        } else if (formFields.description.trim().length < 3) {
-            newErrors.description = "A descrição deve ter pelo menos 3 caracteres"
-        }
-
-        if (!formFields.department) {
-            newErrors.department = "O departamento é obrigatório"
-        }
-
-        if (!formFields.category) {
-            newErrors.category = "A categoria é obrigatória"
-        }
-
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
-    }
-    
-    function validateOnBlur(fieldName: keyof TransactionFormErrors) {
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors }
-
-            if (fieldName === "amount") {
-                const numericAmount = Number(formFields.amount.replace(/\D/g, "")) / 100;
-                if (!formFields.amount || numericAmount <= 0) {
-                    newErrors.amount = "O valor deve ser maior que zero.";
-                } else {
-                    delete newErrors.amount
-                }
-            }
-
-            if (fieldName === "description") {
-                if (!formFields.description.trim()) {
-                    newErrors.description = "A descrição é obrigatória.";
-                } else if (formFields.description.trim().length < 3) {
-                    newErrors.description = "A descrição deve ter no mínimo 3 caracteres.";
-                } else {
-                    delete newErrors.description; // Remove o erro se estiver válido
-                }
-            }
-            return newErrors
-        })
-    }
-    
-    async function handleSubmit(e: React.SubmitEvent) {
-        e.preventDefault() //Não deixa a tela recarregar no envio do formulário
-        const isValid = validate()
-
-        if (!isValid) return;
-
-        try {
-            setIsSubmitting(true)
-
-            await new Promise((resolve) => setTimeout(resolve, 3000))
-            const payload = {
-                ...formFields,
-                id: transaction.id,
-                createdAt: transaction.createdAt,
-                amount: Number(formFields.amount.replace(/\D/g, "")) / 100,
-                date: formFields.date as Date,
-                category: formFields.category as string,
-                department: formFields.department as string
-                //casting
-            }
-
-            await editTransaction(payload)
-
-            toast.success("Lançamento atualizado com sucesso")
-            handleModalClose()
-
-        } catch (error) {
-            toast.error("Falha ao salvar lançamento")
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
-
+    const isEditing = true
+        const {
+            errors,
+            isSubmitting,
+            isCalendarOpen,
+            handleAmountChange,
+            handleCalendarOpen,
+            handleDescription,
+            handleTypeChange,
+            validateOnBlur,
+            handleEditSubmit,
+            formFields,
+            handleDateChange,
+            handleCategoryChange,
+            handleDepartmentChange
+        } = useTransactionForm(isEditing, transaction, handleModalClose)
 
     return(
         <Dialog open={open} onOpenChange={handleModalClose}>
             <DialogContent className="sm:max-w-200">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleEditSubmit}>
                     <DialogHeader>
                         <DialogTitle>Dados do lançamento</DialogTitle>
                         <DialogDescription>
@@ -248,7 +113,7 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                             </Field>
                             <Field>
                                 <FieldLabel htmlFor="data">Data:<span className="text-red-800">*</span></FieldLabel>
-                                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                                <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpen}>
                                     <PopoverTrigger
                                         className={errors.data ? "border-red-500 focus-visible:ring-red-500" : ""}
                                         render={<Button variant="outline" id="data">
@@ -262,10 +127,7 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                                         <Calendar
                                             mode="single"
                                             selected={formFields.date}
-                                            onSelect={(date) => {
-                                                setFormFields(prevFields => ({ ...prevFields, date: date }));
-                                                setIsCalendarOpen(false)
-                                            }}
+                                            onSelect={(date) => {handleDateChange(date as Date)}}
                                             defaultMonth={formFields.date}
                                             locale={ptBR}
                                         />
@@ -299,7 +161,7 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                                 <Label htmlFor="categoria">Categoria:<span className="text-red-800">*</span></Label>
                                 <Select
                                     value={formFields.category}
-                                    onValueChange={(category) => setFormFields(prevFields => ({ ...prevFields, category: category as string }))}
+                                    onValueChange={(category) => handleCategoryChange(category as string)}
                                 >
                                     <SelectTrigger id="categoria" className={errors.category ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
@@ -320,7 +182,7 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                                 <Label htmlFor="departamento">Departamento:<span className="text-red-800">*</span></Label>
                                 <Select
                                     value={formFields.department}
-                                    onValueChange={(department) => setFormFields(prevFields => ({ ...prevFields, department: department as string }))}
+                                    onValueChange={(department) => handleDepartmentChange(department as string)}
                                 >
                                     <SelectTrigger className={errors.department ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
