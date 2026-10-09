@@ -5,8 +5,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+    DialogTitle
 } from "@/components/ui/dialog"
 import Button from "@/components/Button"
 import { Field, FieldContent, FieldGroup } from "../ui/field"
@@ -29,37 +28,39 @@ import {
 import { CATEGORIES } from "@/constants/categories"
 import { DEPARTMENTS } from "@/constants/departments"
 import { Textarea } from "../ui/textarea"
+import type { Transaction } from "@/data/context/TransactionContext"
 import { useTransactionForm } from "@/hooks/useTransactionForm"
 
-interface DialogTriggerStyleProps{
-    dialogTriggerStyle?: string
+
+interface EditTransactionDialogProps{
+    transaction: Transaction
+    open: boolean;
+    handleModalClose: () => void;    
 }
 
-export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTriggerStyleProps) {
-    const isEditing = false
-    const {
-        errors,
-        open,
-        isSubmitting,
-        isCalendarOpen,
-        handleAmountChange,
-        handleCalendarOpen,
-        handleDescription,
-        handleTypeChange,
-        handleOpenChange,
-        validateOnBlur,
-        handleCreateSubmit,
-        formFields,
-        handleDateChange,
-        handleCategoryChange,
-        handleDepartmentChange
-    } = useTransactionForm(isEditing)
+export default function EditTransactionDialog({transaction, open, handleModalClose}: EditTransactionDialogProps){
 
-    return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger render={<Button className={dialogTriggerStyle} variant="outline">Novo Lançamento</Button>} />
+    const isEditing = true
+        const {
+            errors,
+            isSubmitting,
+            isCalendarOpen,
+            handleAmountChange,
+            handleCalendarOpen,
+            handleDescription,
+            handleTypeChange,
+            validateOnBlur,
+            handleEditSubmit,
+            formFields,
+            handleDateChange,
+            handleCategoryChange,
+            handleDepartmentChange
+        } = useTransactionForm(isEditing, transaction, handleModalClose)
+
+    return(
+        <Dialog open={open} onOpenChange={handleModalClose}>
             <DialogContent className="sm:max-w-200">
-                <form onSubmit={handleCreateSubmit}>
+                <form onSubmit={handleEditSubmit}>
                     <DialogHeader>
                         <DialogTitle>Dados do lançamento</DialogTitle>
                         <DialogDescription>
@@ -77,19 +78,19 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                             onValueChange={(val) => handleTypeChange(val as "INCOME" | "EXPENSE")}
                         >
                             <FieldLabel>
-                                <Field orientation="horizontal" className="cursor-pointer">
+                                <Field orientation="horizontal">
                                     <RadioGroupItem value="INCOME" id="income" />
                                     <FieldContent>
-                                        <FieldLabel className="cursor-pointer" htmlFor="income"><CircleArrowUp color="green" />Receita</FieldLabel>
+                                        <FieldLabel htmlFor="income"><CircleArrowUp color="green" />Receita</FieldLabel>
                                     </FieldContent>
                                 </Field>
                             </FieldLabel>
 
                             <FieldLabel>
-                                <Field orientation="horizontal" className="cursor-pointer">
+                                <Field orientation="horizontal">
                                     <RadioGroupItem value="EXPENSE" id="expense" />
                                     <FieldContent>
-                                        <FieldLabel className="cursor-pointer" htmlFor="expense"><CircleArrowDown color="red" />Despesa</FieldLabel>
+                                        <FieldLabel htmlFor="expense"><CircleArrowDown color="red" />Despesa</FieldLabel>
                                     </FieldContent>
                                 </Field>
                             </FieldLabel>
@@ -114,7 +115,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                                 <FieldLabel htmlFor="data">Data:<span className="text-red-800">*</span></FieldLabel>
                                 <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpen}>
                                     <PopoverTrigger
-                                        className={errors.data ? "border-red-500 focus-visible:ring-red-500 cursor-pointer" : "cursor-pointer"}
+                                        className={errors.data ? "border-red-500 focus-visible:ring-red-500" : ""}
                                         render={<Button variant="outline" id="data">
                                             {formFields.date ?
                                                 format(formFields.date, "PPP", { locale: ptBR })
@@ -162,13 +163,13 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                                     value={formFields.category}
                                     onValueChange={(category) => handleCategoryChange(category as string)}
                                 >
-                                    <SelectTrigger id="categoria" className={errors.category ? "border-red-500 focus-visible:ring-red-500 cursor-pointer" : "cursor-pointer"}>
+                                    <SelectTrigger id="categoria" className={errors.category ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
                                     </SelectTrigger>
 
                                     <SelectContent>
                                         {CATEGORIES[formFields.type].map((item) => (
-                                            <SelectItem key={item.value} value={item.value} className="cursor-pointer">
+                                            <SelectItem key={item.value} value={item.value}>
                                                 {item.label}
                                             </SelectItem>
                                         ))}
@@ -183,13 +184,13 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                                     value={formFields.department}
                                     onValueChange={(department) => handleDepartmentChange(department as string)}
                                 >
-                                    <SelectTrigger className={errors.department ? "border-red-500 focus-visible:ring-red-500 cursor-pointer" : "cursor-pointer"}>
+                                    <SelectTrigger className={errors.department ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
                                     </SelectTrigger>
 
                                     <SelectContent>
                                         {DEPARTMENTS.map((item) => (
-                                            <SelectItem className="cursor-pointer" key={item.value} value={item.value}>
+                                            <SelectItem key={item.value} value={item.value}>
                                                 {item.label}
                                             </SelectItem>
                                         ))}

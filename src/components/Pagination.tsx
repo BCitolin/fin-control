@@ -19,8 +19,25 @@ export default function Pagination({startItem, endItem, totalItems, currentPage,
 
                 {/* Botoes */}
                 <div className="gap-2 flex items-center">
-                    <Button variant="outline" size="sm" onClick={handlePreviusPage} disabled={currentPage === 1 || totalItems === 0}>Anterior</Button>
-                    <Button variant="outline" size="sm" onClick={handleNextPage} disabled={currentPage === totalPages || totalPages === 0}>Próximo</Button>
+                    <Button 
+                        className="cursor-pointer" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handlePreviusPage} 
+                        disabled={currentPage === 1 || totalItems === 0}
+                    >
+                        Anterior
+                    </Button>
+
+                    <Button 
+                        className="cursor-pointer" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleNextPage} 
+                        disabled={currentPage === totalPages || totalPages === 0}
+                    >
+                        Próximo
+                    </Button>
                 </div>
             </div>
     )

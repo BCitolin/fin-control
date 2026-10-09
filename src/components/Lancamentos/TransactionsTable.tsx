@@ -3,33 +3,65 @@ import { formatCurrency, formatDate } from "@/utils/Formater";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Pencil, Trash2 } from "lucide-react";
-import { useTransaction } from "@/data/context/TransactionContext";
-import { useState } from "react";
+import { useTransaction, type Transaction } from "@/data/context/TransactionContext";
+import { useEffect, useState } from "react";
 import Pagination from "../Pagination";
+import EditTransactionDialog from "./EditTransactionDialog";
+import DeleteTransactionDialog from "./DeleteTransactionDialog";
 
 export default function TransactionsTable() {
-    const { transactions } = useTransaction()
-        const [currentPage, setCurrentPage] = useState(1)
-        const pageSize = 10
-        const currentTransactions = transactions.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-        const totalItems = transactions.length
-        const totalPages = Math.ceil(totalItems / pageSize)
-        const startIndex = (currentPage - 1) * pageSize
-        const endIndex = currentPage * pageSize
-        const startItem = totalItems === 0 ? 0 : startIndex + 1
-        const endItem = Math.min(endIndex, totalItems)
-    
-        const handleNextPage = () => {
-            if (currentPage < totalPages) {
-                setCurrentPage(currentPage + 1)
-            }
+    const { transactions, filters } = useTransaction()
+    const [currentPage, setCurrentPage] = useState(1)
+    const [isOpen, setIsOpen] = useState(false)
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+    const [deletingTransaction, setDelettingTransaction] = useState<Transaction | null>(null)
+
+    const pageSize = 5
+    //Current transactions que mostra as transações
+    const currentTransactions = transactions.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+    const totalItems = transactions.length
+    const totalPages = Math.ceil(totalItems / pageSize)
+    const startIndex = (currentPage - 1) * pageSize
+    const endIndex = currentPage * pageSize
+    const startItem = totalItems === 0 ? 0 : startIndex + 1
+    const endItem = Math.min(endIndex, totalItems)
+
+    const handleModalOpenEditting = (item: Transaction) => {
+        setEditingTransaction(item)
+        setIsOpen(true)
+    }
+
+    const handleModalCloseEditting = () => {
+        setEditingTransaction(null)
+        setIsOpen(false)
+    }
+
+    const handleModalOpenDeletting = (item: Transaction) => {
+        setDelettingTransaction(item)
+        setIsOpen(true)
+    }
+
+    const handleModalCloseDeletting = () => {
+        setDelettingTransaction(null)
+        setIsOpen(false)
+    }
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1)
         }
-    
-        const handlePreviusPage = () => {
-            if (currentPage > 1) {
-                setCurrentPage(currentPage - 1)
-            }
+    }
+
+    const handlePreviusPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1)
         }
+    }
+
+    useEffect(()=>{
+        setCurrentPage(1)
+    }, [filters])
+
     return (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <Table>
@@ -46,27 +78,61 @@ export default function TransactionsTable() {
                 </TableHeader>
 
                 <TableBody>
-                    {currentTransactions.map((item) => {
-                         const isIncome = item.type === 'INCOME'
-                        return(<TableRow key={item.id}>
-                            <TableCell className="text-gray-600">{formatDate(item.date)}</TableCell>
-                            <TableCell className="font-medium text-gray-900">{item.description}</TableCell>
-                            <TableCell className="text-center">{item.category}</TableCell>
-                            <TableCell className="text-center">{item.department}</TableCell>
-                            <TableCell className="text-center">
-                                <Badge variant="outline" className={isIncome ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-50" : "bg-red-50 text-red-700 border-red-200 hover:bg-red-50"}>{isIncome ? "Receita" : "Despesa"}</Badge>
-                            </TableCell>
-                            <TableCell className={`text-center ${item.type == "EXPENSE" ? "text-red-800" : "text-green-800"}`}>{formatCurrency(item.amount, item.type)}</TableCell>
-                            <TableCell className="text-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-800 hover:bg-blue-50 cursor-pointer">
-                                    <Pencil size={16}/>
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer">
-                                    <Trash2 size={16}/>
-                                </Button>
-                            </TableCell>
-                        </TableRow>)
-                    })}
+                    {currentTransactions.length > 0 ? (currentTransactions.map((item) => {
+                        const isIncome = item.type === 'INCOME'
+                        return (
+                            <TableRow key={item.id}>
+                                <TableCell className="text-gray-600">{formatDate(item.date)}</TableCell>
+                                <TableCell className="font-medium text-gray-900">{item.description}</TableCell>
+                                <TableCell className="text-center">{item.category}</TableCell>
+                                <TableCell className="text-center">{item.department}</TableCell>
+                                <TableCell className="text-center">
+                                    <Badge
+                                        variant="outline"
+                                        className={isIncome ?
+                                            "bg-green-50 text-green-700 border-green-200 hover:bg-green-50"
+                                            : "bg-red-50 text-red-700 border-red-200 hover:bg-red-50"
+                                        }
+                                    >
+                                        {isIncome ? "Receita" : "Despesa"}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell
+                                    className={`text-center ${item.type == "EXPENSE" ?
+                                        "text-red-800"
+                                        : "text-green-800"}`}
+                                >
+                                    {formatCurrency(item.amount as number, item.type)}
+                                </TableCell>
+                                <TableCell className="text-center gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-gray-800 hover:bg-blue-50 cursor-pointer"
+                                        onClick={() => handleModalOpenEditting(item)}
+                                    >
+                                        <Pencil size={16} />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                                        onClick={() => handleModalOpenDeletting(item)}
+                                    >
+                                        <Trash2 size={16} />
+                                    </Button>
+                                </TableCell>
+                            </TableRow>)
+                        }))
+                        :
+                        (
+                            <TableRow>
+                                <TableCell colSpan={7} className="h-30 text-center text-muted-foreground">
+                                    Nenhum lançamento encontrado.
+                                </TableCell>
+                            </TableRow>
+                        )
+                    }
                 </TableBody>
 
             </Table>
@@ -81,6 +147,22 @@ export default function TransactionsTable() {
                 handleNextPage={handleNextPage}
                 handlePreviusPage={handlePreviusPage}
             />
+
+            {editingTransaction && (
+                <EditTransactionDialog
+                    transaction={editingTransaction}
+                    open={isOpen}
+                    handleModalClose={handleModalCloseEditting}
+                />
+            )}
+
+            {deletingTransaction && (
+                <DeleteTransactionDialog
+                    transaction={deletingTransaction}
+                    open={isOpen}
+                    handleModalClose={handleModalCloseDeletting}
+                />
+            )}
         </div>
     )
 }
