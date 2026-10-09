@@ -26,172 +26,40 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { maskCurrency } from "@/utils/Formater"
 import { CATEGORIES } from "@/constants/categories"
-import React, { useState } from "react"
 import { DEPARTMENTS } from "@/constants/departments"
-import { toast } from "sonner"
 import { Textarea } from "../ui/textarea"
-import { useTransaction, type TransactionFormErrors } from "@/data/context/TransactionContext"
-
-interface InitialValuesType {
-    date: Date | undefined,
-    type: "INCOME" | "EXPENSE",
-    category: string | null,
-    description: string,
-    amount: string,
-    department: string | null
-}
-
-const initialValues: InitialValuesType = {
-    date: undefined,
-    type: "INCOME",
-    category: "",
-    description: "",
-    amount: "",
-    department: ""
-}
-
-const initialErrors: TransactionFormErrors = {
-    type: "",
-    amount: "",
-    data: "",
-    department: "",
-    description: "",
-    category: ""
-}
+import { useTransactionForm } from "@/hooks/useTransactionForm"
 
 interface dialogTriggerStyle{
     dialogTriggerStyle?: string
 }
 
 export default function CreateTransactionDialog({dialogTriggerStyle}: dialogTriggerStyle) {
-    const { addTransaction } = useTransaction();
-    const [errors, setErrors] = useState<TransactionFormErrors>({})
-    const [formFields, setFormFields] = useState(initialValues)
-    const [open, setOpen] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
-
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const formattedValue = maskCurrency(e.target.value)
-        setFormFields(prevFields => ({ ...prevFields, amount: formattedValue }))
-    }
-
-    const handleTypeChange = (newType: "INCOME" | "EXPENSE") => {
-        setFormFields(prevFields => ({ ...prevFields, type: newType, category: "" }))
-    }
-
-    function handleDescription(value: string) {
-        setFormFields(prevFields => {
-            return value.length <= 200 ? { ...prevFields, description: value } : { ...prevFields }
-        })
-    }
-
-    const handleOpenChange = (isOpen: boolean) => {
-        setOpen(isOpen)
-        setFormFields(initialValues)
-        setErrors(initialErrors)
-    }
-
-    function validate() {
-        const newErrors: TransactionFormErrors = {}
-
-        if (!formFields.type) {
-            newErrors.type = "O tipo do lançamento é obrigatório."
-        }
-
-        const numericAmount = Number(formFields.amount.replace(/\D/g, "")) / 100
-        if (!formFields.amount || numericAmount <= 0) {
-            newErrors.amount = "O valor deve ser maior que 0."
-        }
-
-        if (!formFields.date) {
-            newErrors.data = "A data é obrigatória"
-        }
-
-        if (!formFields.description.trim()) {
-            newErrors.description = "A descrição é obrigatória"
-        } else if (formFields.description.trim().length < 3) {
-            newErrors.description = "A descrição deve ter pelo menos 3 caracteres"
-        }
-
-        if (!formFields.department) {
-            newErrors.department = "O departamento é obrigatório"
-        }
-
-        if (!formFields.category) {
-            newErrors.category = "A categoria é obrigatória"
-        }
-
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
-    }
-
-    function validateOnBlur(fieldName: keyof TransactionFormErrors) {
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors }
-
-            if (fieldName === "amount") {
-                const numericAmount = Number(formFields.amount.replace(/\D/g, "")) / 100;
-                if (!formFields.amount || numericAmount <= 0) {
-                    newErrors.amount = "O valor deve ser maior que zero.";
-                } else {
-                    delete newErrors.amount
-                }
-            }
-
-            if (fieldName === "description") {
-                if (!formFields.description.trim()) {
-                    newErrors.description = "A descrição é obrigatória.";
-                } else if (formFields.description.trim().length < 3) {
-                    newErrors.description = "A descrição deve ter no mínimo 3 caracteres.";
-                } else {
-                    delete newErrors.description; // Remove o erro se estiver válido
-                }
-            }
-            return newErrors
-        })
-    }
-
-    async function handleSubmit(e: React.SubmitEvent) {
-        e.preventDefault()
-        const isValid = validate()
-
-        if (!isValid) return;
-
-        try {
-            setIsSubmitting(true)
-
-            await new Promise((resolve) => setTimeout(resolve, 3000))
-            const payload = {
-                ...formFields,
-                id: crypto.randomUUID(),
-                createdAt: new Date(),
-                amount: Number(formFields.amount.replace(/\D/g, "")) / 100,
-                date: formFields.date as Date,
-                category: formFields.category as string,
-                department: formFields.department as string
-                //casting
-            }
-
-            await addTransaction(payload)
-
-            toast.success("Lançamento criado com sucesso")
-            setOpen(false)
-
-        } catch (error) {
-            toast.error("Falha ao criar lançamento")
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
+    const isEditing = false
+    const {
+        errors,
+        open,
+        isSubmitting,
+        isCalendarOpen,
+        handleAmountChange,
+        handleCalendarOpen,
+        handleDescription,
+        handleTypeChange,
+        handleOpenChange,
+        validateOnBlur,
+        handleCreateSubmit,
+        formFields,
+        handleDateChange,
+        handleCategoryChange,
+        handleDepartmentChange
+    } = useTransactionForm(isEditing)
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger render={<Button className={dialogTriggerStyle} variant="outline">Novo Lançamento</Button>} />
             <DialogContent className="sm:max-w-200">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleCreateSubmit}>
                     <DialogHeader>
                         <DialogTitle>Dados do lançamento</DialogTitle>
                         <DialogDescription>
@@ -244,7 +112,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: dialogTrig
                             </Field>
                             <Field>
                                 <FieldLabel htmlFor="data">Data:<span className="text-red-800">*</span></FieldLabel>
-                                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                                <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpen}>
                                     <PopoverTrigger
                                         className={errors.data ? "border-red-500 focus-visible:ring-red-500" : ""}
                                         render={<Button variant="outline" id="data">
@@ -258,10 +126,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: dialogTrig
                                         <Calendar
                                             mode="single"
                                             selected={formFields.date}
-                                            onSelect={(date) => {
-                                                setFormFields(prevFields => ({ ...prevFields, date: date }));
-                                                setIsCalendarOpen(false)
-                                            }}
+                                            onSelect={(date) => {handleDateChange(date as Date)}}
                                             defaultMonth={formFields.date}
                                             locale={ptBR}
                                         />
@@ -295,7 +160,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: dialogTrig
                                 <Label htmlFor="categoria">Categoria:<span className="text-red-800">*</span></Label>
                                 <Select
                                     value={formFields.category}
-                                    onValueChange={(category) => setFormFields(prevFields => ({ ...prevFields, category: category }))}
+                                    onValueChange={(category) => handleCategoryChange(category as string)}
                                 >
                                     <SelectTrigger id="categoria" className={errors.category ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
@@ -316,7 +181,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: dialogTrig
                                 <Label htmlFor="departamento">Departamento:<span className="text-red-800">*</span></Label>
                                 <Select
                                     value={formFields.department}
-                                    onValueChange={(department) => setFormFields(prevFields => ({ ...prevFields, department: department }))}
+                                    onValueChange={(department) => handleDepartmentChange(department as string)}
                                 >
                                     <SelectTrigger className={errors.department ? "border-red-500 focus-visible:ring-red-500" : ""}>
                                         <SelectValue placeholder="Selecione" />
