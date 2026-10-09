@@ -51,6 +51,7 @@ export const useTransactionForm = (isEditing: boolean, transaction?: Transaction
 
     const handleDateChange = (newDate: Date) => {
         setFormFields(prevFields => ({ ...prevFields, date: newDate }))
+        setIsCalendarOpen(false)
     }
 
     const handleCategoryChange = (newCategory: string) => {
@@ -156,7 +157,6 @@ export const useTransactionForm = (isEditing: boolean, transaction?: Transaction
                 department: formFields.department as string
                 //casting
             }
-
             await editTransaction(payload)
 
             toast.success("Lançamento atualizado com sucesso")

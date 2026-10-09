@@ -5,8 +5,8 @@ import { useTransaction } from "@/data/context/TransactionContext";
 import { Card, CardHeader, CardFooter, CardTitle, CardDescription } from "../ui/card";
 
 export default function TransactionsContainer() {
-    const { transactions } = useTransaction()
-    if (transactions.length === 0) {
+    const { realTransactions } = useTransaction()
+    if (realTransactions.length === 0) {
         return (<div className="flex h-full items-center justify-center">
                 <Card className="mx-auto w-full max-w-120">
                     <CardHeader>
