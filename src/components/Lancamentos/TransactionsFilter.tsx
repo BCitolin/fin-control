@@ -14,84 +14,83 @@ import { Input } from "../ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export default function TransactionsFilter() {
-    
-    const [tipo, setTipo] = useState<"Todos" | "Receitas" | "Despesas" | undefined>("Todos")
-    const [categoria, setCategoria] = useState<string>("Todos")
-    const [departamento, setDepartamento] = useState<string>("Todos")
-    const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined)
-    const [dataFim, setDataFim] = useState<Date | undefined>(undefined)
-    const [busca, setBusca] = useState<string>("")
-    const [isCalendarInicioOpen, setIsCalendarInicioOpen] = useState(false)
-    const [isCalendarFimOpen, setIsCalendarFimOpen] = useState(false)
 
-    const debounceValue = useDebounce(busca, 300)
+    const [type, setType] = useState<"Todos" | "Receitas" | "Despesas" | undefined>("Todos")
+    const [category, setCategory] = useState<string>("Todos")
+    const [department, setDepartment] = useState<string>("Todos")
+    const [startDate, setStartDate] = useState<Date | undefined>(undefined)
+    const [endDate, setEndDate] = useState<Date | undefined>(undefined)
+    const [searchDescription, setSearchDescription] = useState<string>("")
+    const [isCalendarStartDateOpen, setIsCalendarStartDateOpen] = useState(false)
+    const [isCalendarEndDateOpen, setIsCalendarEndDateOpen] = useState(false)
+
+    const debounceValue = useDebounce(searchDescription, 300)
     const { filterTransactions, filters } = useTransaction()
 
-    function handleTypeChange(novoTipo: string) {
+    function handleTypeChange(newType: string) {
         //Código necessário para filtrar e atualizar a lista de transações no Context
         const filter = {
             ...filters, //Spread
-            type: novoTipo === "Todos" ? "" : novoTipo
+            type: newType === "Todos" ? "" : newType
         }
         filterTransactions(filter)
         //Código para renderizar lable no select
-        setTipo(() => {
-            if (novoTipo === "Todos") return "Todos"
-            if (novoTipo === "INCOME") return "Receitas"
-            if (novoTipo === "EXPENSE") return "Despesas"
+        setType(() => {
+            if (newType === "Todos") return "Todos"
+            if (newType === "INCOME") return "Receitas"
+            if (newType === "EXPENSE") return "Despesas"
         }
         )
     }
 
-    function handleCategoryChange(novaCategoria: string) {
+    function handleCategoryChange(newCategory: string) {
         const filter = {
             ...filters,
-            category: novaCategoria === "Todos" ? "" : novaCategoria
+            category: newCategory === "Todos" ? "" : newCategory
         }
         filterTransactions(filter)
-        setCategoria(novaCategoria)
+        setCategory(newCategory)
     }
 
-    function handleDepartmentChange(novoDepartamento: string) {
+    function handleDepartmentChange(newDepartment: string) {
         const filter = {
             ...filters,
-            department: novoDepartamento === "Todos" ? "" : novoDepartamento
+            department: newDepartment === "Todos" ? "" : newDepartment
         }
         filterTransactions(filter)
-        setDepartamento(novoDepartamento)
+        setDepartment(newDepartment)
     }
 
-
-    function handleDataInicioChange(newDate: Date | undefined) {
+    function handleStartDateChange(newDate: Date | undefined) {
         const filter = {
             ...filters,
-            deData: newDate
+            startDate: newDate
         }
         filterTransactions(filter)
-        setIsCalendarInicioOpen(false)
-        setDataInicio(newDate)
+        setIsCalendarStartDateOpen(false)
+        setStartDate(newDate)
     }
 
-    function handleDataFimChange(newDate: Date | undefined) {
+    function handleEndDateChange(newDate: Date | undefined) {
         const filter = {
             ...filters,
-            ateData: newDate
+            endDate: newDate
         }
         filterTransactions(filter)
-        setIsCalendarFimOpen(false)
-        setDataFim(newDate)
-    }
-    
-    function handleBuscaChange(newValue: string) {
-        setBusca(newValue)
+        setIsCalendarEndDateOpen(false)
+        setEndDate(newDate)
     }
 
-    function handleCalendarInicioOpen(isOpen: boolean) {
-        setIsCalendarInicioOpen(isOpen)
+    function handleSearchDescriptionChange(newValue: string) {
+        setSearchDescription(newValue)
     }
 
-    function handleCalendarFimOpen(isOpen: boolean) {
-        setIsCalendarFimOpen(isOpen)
+    function handleCalendarStartDateOpen(isOpen: boolean) {
+        setIsCalendarStartDateOpen(isOpen)
+    }
+
+    function handleCalendarEndDateOpen(isOpen: boolean) {
+        setIsCalendarEndDateOpen(isOpen)
     }
 
     function resetFilters() {
@@ -99,23 +98,23 @@ export default function TransactionsFilter() {
             type: "",
             category: "",
             department: "",
-            deData: undefined,
-            ateData: undefined,
-            busca: ""
+            startDate: undefined,
+            endDate: undefined,
+            searchDescription: ""
         }
         filterTransactions(filter)
-        setTipo("Todos")
-        setCategoria("Todos")
-        setDepartamento("Todos")
-        setDataInicio(undefined)
-        setDataFim(undefined)
-        setBusca("")
+        setType("Todos")
+        setCategory("Todos")
+        setDepartment("Todos")
+        setStartDate(undefined)
+        setEndDate(undefined)
+        setSearchDescription("")
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         const filter = {
             ...filters,
-            busca: debounceValue
+            searchDescription: debounceValue
         }
         filterTransactions(filter)
     }, [debounceValue])
@@ -124,14 +123,14 @@ export default function TransactionsFilter() {
         <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap items-center gap-6">
             {/* Filtros de data */}
             <div className="flex flex-row gap-1">
-                <Popover open={isCalendarInicioOpen} onOpenChange={handleCalendarInicioOpen}>
+                <Popover open={isCalendarStartDateOpen} onOpenChange={handleCalendarStartDateOpen}>
                     <Label htmlFor="deData" className="text-sm font-medium text-gray-500">De:</Label>
                     <PopoverTrigger
                         id="deData"
                         className="cursor-pointer"
                         render={<Button variant="outline" id="data">
-                            {filters.deData ?
-                                format(filters.deData, "PPP", { locale: ptBR })
+                            {filters.startDate ?
+                                format(filters.startDate, "PPP", { locale: ptBR })
                                 : <span className="flex flex-row gap-2"><CalendarDays />Selecione uma data</span>
                             }
                         </Button>}
@@ -139,9 +138,9 @@ export default function TransactionsFilter() {
                     <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                             mode="single"
-                            selected={dataInicio}
-                            onSelect={(date) => { handleDataInicioChange(date) }}
-                            defaultMonth={dataInicio}
+                            selected={startDate}
+                            onSelect={(date) => { handleStartDateChange(date) }}
+                            defaultMonth={startDate}
                             locale={ptBR}
                         />
                     </PopoverContent>
@@ -149,13 +148,13 @@ export default function TransactionsFilter() {
             </div>
 
             <div className="flex flex-row gap-1 items-center">
-                <Popover open={isCalendarFimOpen} onOpenChange={handleCalendarFimOpen}>
+                <Popover open={isCalendarEndDateOpen} onOpenChange={handleCalendarEndDateOpen}>
                     <label className="text-sm font-medium text-gray-500">Até:</label>
                     <PopoverTrigger
                         className="cursor-pointer"
                         render={<Button variant="outline" id="data">
-                            {filters.ateData ?
-                                format(filters.ateData, "PPP", { locale: ptBR })
+                            {filters.endDate ?
+                                format(filters.endDate, "PPP", { locale: ptBR })
                                 : <span className="flex flex-row gap-2"><CalendarDays />Selecione uma data</span>
                             }
                         </Button>}
@@ -163,9 +162,9 @@ export default function TransactionsFilter() {
                     <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                             mode="single"
-                            selected={dataFim}
-                            onSelect={(date) => { handleDataFimChange(date) }}
-                            defaultMonth={dataFim}
+                            selected={endDate}
+                            onSelect={(date) => { handleEndDateChange(date) }}
+                            defaultMonth={endDate}
                             locale={ptBR}
                         />
                     </PopoverContent>
@@ -175,7 +174,7 @@ export default function TransactionsFilter() {
             {/* Select de tipo */}
             <div className="flex flex-row items-center gap-1.5">
                 <label className="text-sm font-medium text-gray-500">Tipo:</label>
-                <Select value={tipo || "Todos"} onValueChange={(value) => handleTypeChange(value as string)}>
+                <Select value={type || "Todos"} onValueChange={(value) => handleTypeChange(value as string)}>
                     <SelectTrigger className="cursor-pointer">
                         <SelectValue placeholder="Todos" />
                     </SelectTrigger>
@@ -192,7 +191,7 @@ export default function TransactionsFilter() {
                 <label className="text-sm font-medium text-gray-500">Categoria:</label>
                 <Select
                     defaultValue="Todos"
-                    value={categoria}
+                    value={category}
                     onValueChange={(value) => (handleCategoryChange(value as string))}
                 >
                     <SelectTrigger className="cursor-pointer">
@@ -222,7 +221,7 @@ export default function TransactionsFilter() {
                 <label className="text-sm font-medium text-gray-500">Departamento:</label>
                 <Select
                     defaultValue="Todos"
-                    value={departamento}
+                    value={department}
                     onValueChange={(value) => handleDepartmentChange(value as string)}
                 >
                     <SelectTrigger className="cursor-pointer">
@@ -241,7 +240,7 @@ export default function TransactionsFilter() {
             <div className="flex flex-row gap-1.5 flex-1 min-w-[200px] items-center">
                 <label className="text-sm text-gray-500 font-medium">Busca:</label>
                 <div className="flex flex-row items-center">
-                    <Input value={busca} onChange={(event) => (handleBuscaChange(event.target.value))} />
+                    <Input value={searchDescription} onChange={(event) => (handleSearchDescriptionChange(event.target.value))} />
                     <Search className="h-5 w-5 text-gray-400 ml-2" />
                 </div>
             </div>

@@ -26,7 +26,7 @@ const initialValues: InitialValuesType = {
 const initialErrors: TransactionFormErrors = {
     type: "",
     amount: "",
-    data: "",
+    date: "",
     department: "",
     description: "",
     category: ""
@@ -91,7 +91,7 @@ export const useTransactionForm = (isEditing: boolean, transaction?: Transaction
         }
 
         if (!formFields.date) {
-            newErrors.data = "A data é obrigatória"
+            newErrors.date = "A data é obrigatória"
         }
 
         if (!formFields.description.trim()) {
