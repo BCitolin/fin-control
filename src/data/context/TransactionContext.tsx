@@ -15,7 +15,7 @@ export interface Transaction {
 export interface TransactionFormErrors {
     type?: string;
     amount?: string;
-    data?: string;
+    date?: string;
     description?: string;
     category?: string;
     department?: string
@@ -25,9 +25,9 @@ export interface TransactionFilters {
     type: string;
     category: string;
     department: string;
-    deData: Date | undefined;
-    ateData: Date | undefined;
-    busca: string
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+    searchDescription: string
 }
 
 // Define o que vai receber quem chamar esse contexto
@@ -49,12 +49,11 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
         type: "",
         category: "",
         department: "",
-        deData: undefined,
-        ateData: undefined,
-        busca: ""
+        startDate: undefined,
+        endDate: undefined,
+        searchDescription: ""
     }) 
     
-
     function addTransaction(payload: Transaction){
         setTransactions((prevTransactions)=> ([...prevTransactions, payload]))
     }
@@ -77,17 +76,17 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
 
     const filteredTransactions = useMemo(()=>{
         return transactions.filter((transaction)=>{
-            const buscaNormalizada = filters.busca.trim().toLowerCase()
-            const descricaoNormalizada = transaction.description.toLowerCase()
+            const normalizeSearch = filters.searchDescription.trim().toLowerCase()
+            const normalizeDescription = transaction.description.toLowerCase()
 
-            const filtrouTipo = filters.type === "" || transaction.type === filters.type;
-            const filtrouCategoria = filters.category === "" || transaction.category === filters.category;
-            const filtrouDepartamento = filters.department === "" || transaction.department === filters.department;
-            const filtrouDeData = filters.deData === undefined || transaction.date >= filters.deData;
-            const filtrouAteData = filters.ateData === undefined || transaction.date <= filters.ateData;
-            const filtrouDescricao = buscaNormalizada === "" || descricaoNormalizada.includes(buscaNormalizada)
+            const filteredType = filters.type === "" || transaction.type === filters.type;
+            const filteredCategory = filters.category === "" || transaction.category === filters.category;
+            const filteredDepartment = filters.department === "" || transaction.department === filters.department;
+            const filteredStartDate = filters.startDate === undefined || transaction.date >= filters.startDate;
+            const filteredEndDate = filters.endDate === undefined || transaction.date <= filters.endDate;
+            const filteredDescription = normalizeSearch === "" || normalizeDescription.includes(normalizeSearch)
 
-            return filtrouTipo && filtrouCategoria && filtrouDepartamento && filtrouDeData && filtrouAteData && filtrouDescricao
+            return filteredType && filteredCategory && filteredDepartment && filteredStartDate && filteredEndDate && filteredDescription
         })
     }, [filters, transactions])
 

@@ -115,7 +115,7 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                                 <FieldLabel htmlFor="data">Data:<span className="text-red-800">*</span></FieldLabel>
                                 <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpen}>
                                     <PopoverTrigger
-                                        className={errors.data ? "border-red-500 focus-visible:ring-red-500" : ""}
+                                        className={errors.date ? "border-red-500 focus-visible:ring-red-500" : ""}
                                         render={<Button variant="outline" id="data">
                                             {formFields.date ?
                                                 format(formFields.date, "PPP", { locale: ptBR })
@@ -133,7 +133,7 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                                         />
                                     </PopoverContent>
                                 </Popover>
-                                {errors.data && <p className="text-xs text-red-500 mt-1">{errors.data}</p>}
+                                {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                             </Field>
                         </FieldGroup>
 
