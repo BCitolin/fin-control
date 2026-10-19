@@ -114,7 +114,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                                 <FieldLabel htmlFor="data">Data:<span className="text-red-800">*</span></FieldLabel>
                                 <Popover open={isCalendarOpen} onOpenChange={handleCalendarOpen}>
                                     <PopoverTrigger
-                                        className={errors.data ? "border-red-500 focus-visible:ring-red-500 cursor-pointer" : "cursor-pointer"}
+                                        className={errors.date ? "border-red-500 focus-visible:ring-red-500 cursor-pointer" : "cursor-pointer"}
                                         render={<Button variant="outline" id="data">
                                             {formFields.date ?
                                                 format(formFields.date, "PPP", { locale: ptBR })
@@ -132,7 +132,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                                         />
                                     </PopoverContent>
                                 </Popover>
-                                {errors.data && <p className="text-xs text-red-500 mt-1">{errors.data}</p>}
+                                {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                             </Field>
                         </FieldGroup>
 
