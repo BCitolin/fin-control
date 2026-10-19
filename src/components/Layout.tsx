@@ -2,7 +2,8 @@ import { Outlet } from "react-router-dom"
 import { Sidebar } from "@/components/Sidebar"
 import { Header } from "@/components/Header"
 import { TransactionProvider } from "@/data/context/TransactionContext"
-import {Toaster} from "sonner"
+import { DepartmentsProvider } from "@/data/context/DepartmentsContext"
+import { Toaster } from "sonner"
 
 export default function Layout() {
 
@@ -17,12 +18,14 @@ export default function Layout() {
                 <Header />
                 {/* Conteúdo Principal */}
                 <main className="flex-1 overflow-y-auto p-6">
-                    <TransactionProvider>
-                        <Outlet />
-                    </TransactionProvider>
+                    <DepartmentsProvider>
+                        <TransactionProvider>
+                            <Outlet />
+                        </TransactionProvider>
+                    </DepartmentsProvider>
                 </main>
             </div>
-            <Toaster position="top-right" richColors/>
+            <Toaster position="top-right" richColors />
         </div>
     )
 }
