@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useTransaction, type TransactionFormErrors } from "@/data/context/TransactionContext"
+import { useTransaction } from "@/data/context/TransactionContext"
 import { maskCurrency } from "@/utils/Formater"
 import { toast } from 'sonner'
 import { type Transaction } from "@/data/context/TransactionContext"
@@ -23,6 +23,15 @@ const initialValues: InitialValuesType = {
     department: ""
 }
 
+interface TransactionFormErrors {
+    type?: string;
+    amount?: string;
+    date?: string;
+    description?: string;
+    category?: string;
+    department?: string
+}
+
 const initialErrors: TransactionFormErrors = {
     type: "",
     amount: "",
@@ -34,6 +43,7 @@ const initialErrors: TransactionFormErrors = {
 
 export const useTransactionForm = (isEditing: boolean, transaction?: Transaction, handleModalClose?: () => void) => {
     const { addTransaction, editTransaction } = useTransaction()
+    
     const [errors, setErrors] = useState<TransactionFormErrors>({})
     const [formFields, setFormFields] = useState(initialValues)
     const [open, setOpen] = useState(false)

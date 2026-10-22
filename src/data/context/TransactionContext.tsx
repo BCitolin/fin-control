@@ -12,15 +12,6 @@ export interface Transaction {
     createdAt: Date;
 }
 
-export interface TransactionFormErrors {
-    type?: string;
-    amount?: string;
-    date?: string;
-    description?: string;
-    category?: string;
-    department?: string
-}
-
 export interface TransactionFilters {
     type: string;
     category: string;
