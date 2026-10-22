@@ -12,29 +12,54 @@ import Button from "../Button";
 import { Field, FieldGroup } from "../ui/field"
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { useDepartmentsForm } from "@/hooks/useDepartmentsForm";
 
 interface DialogTriggerStyleProps {
     dialogTriggerStyle?: string
 }
 
 export default function CreateDepartmentsDialog({ dialogTriggerStyle }: DialogTriggerStyleProps) {
+    const {
+        isOpen,
+        errors,
+        formFields,
+        isSubmitting,
+        validateOnBlur,
+        handleOpenChange,
+        handleNameChange,
+        handleCreateSubmit
+    } = useDepartmentsForm()
+    
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger render={<Button className={dialogTriggerStyle} variant="outline" />}>
                 Adicionar Departamento
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-200">
-                <form>
+                <form onSubmit={handleCreateSubmit}>
                     <DialogHeader>
-                        <DialogTitle></DialogTitle>
-                        <DialogDescription></DialogDescription>
+                        <DialogTitle>Novo departamento</DialogTitle>
+                        <DialogDescription>
+                            Preencha os campos abaixo. Campos marcados com <span className="text-red-800">*</span> são obrigatórios.
+                        </DialogDescription>
                     </DialogHeader>
 
-                    <FieldGroup>
+                    <FieldGroup className="pt-5 pb-5">
                         <Field>
-                            <Label></Label>
-                            <Input></Input>
+                            <Label htmlFor="nome">Nome:<span className="text-red-800">*</span></Label>
+                            <span className="text-xs text-muted-foreground">{formFields.name.length}/50</span>
+                            <Input 
+                                id="nome"
+                                placeholder="Ex.: Recursos Humanos"
+                                className={errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}
+                                maxLength={50}
+                                onBlur={() => validateOnBlur("name")}
+                                onChange={(event) => handleNameChange(event.target.value)}
+                                value={formFields.name}
+                            >
+                            </Input>
+                            {errors.name && <p className="text-xs text-red-500 ml-1">{errors.name}</p>}
                         </Field>
                     </FieldGroup>
 
@@ -42,8 +67,8 @@ export default function CreateDepartmentsDialog({ dialogTriggerStyle }: DialogTr
                         <DialogClose render={<Button className="cursor-pointer" variant="outline">Cancelar</Button>} />
                         <Button
                             type="submit"
-                            disabled={false}
-                            isLoading={false}
+                            disabled={isSubmitting}
+                            isLoading={isSubmitting}
                             loadingMessage="Salvando..."
                             className="cursor-pointer"
                         >

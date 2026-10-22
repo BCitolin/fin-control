@@ -1,13 +1,12 @@
 import { createContext, useContext, useState } from "react";
 
-export interface Department{
+export interface Department {
     id: string,
-    label: string,
-    value: string,
+    name: string,
     createdAt: Date
 }
 
-interface DepartmentContentType{
+interface DepartmentContentType {
     departments: Department[],
     addDepartment: (payload: Department) => void
     editDepartment: (payload: Department) => void
@@ -16,28 +15,30 @@ interface DepartmentContentType{
 
 const DepartmentContext = createContext<DepartmentContentType | undefined>(undefined)
 
-export function DepartmentsProvider({children}: {children: React.ReactNode}){
+export function DepartmentsProvider({ children }: { children: React.ReactNode }) {
     const [departments, setDepartments] = useState<Department[]>([
-        {id: crypto.randomUUID(), label: "Recursos Humanos", value: "Recursos Humanos", createdAt: new Date() },
-        {id: crypto.randomUUID(), label: "TI", value: "TI", createdAt: new Date() },
-        {id: crypto.randomUUID(), label: "Marketing", value: "Marketing", createdAt: new Date()},
-        {id: crypto.randomUUID(), label: "Comercial", value: "Comercial", createdAt: new Date()}
+        { id: crypto.randomUUID(), name: "Recursos Humanos", createdAt: new Date() },
+        { id: crypto.randomUUID(), name: "TI", createdAt: new Date() },
+        { id: crypto.randomUUID(), name: "Marketing", createdAt: new Date() },
+        { id: crypto.randomUUID(), name: "Comercial", createdAt: new Date() }
     ])
 
-    function addDepartment(payload: Department){
-        return
+    function addDepartment(payload: Department) {
+        setDepartments((prevTransactions) => ([...prevTransactions, payload]))
     }
 
-    function editDepartment(payload: Department){
-        return
+    function editDepartment(payload: Department) {
+        setDepartments((prev) => 
+            prev.map((department) => department.id === payload.id ? payload : department)
+        )
     }
 
-    function deleteDepartment(payload: Department){
+    function deleteDepartment(payload: Department) {
         return
     }
 
     return (
-        <DepartmentContext.Provider value={{departments, addDepartment, editDepartment, deleteDepartment}}>
+        <DepartmentContext.Provider value={{ departments, addDepartment, editDepartment, deleteDepartment }}>
             {children}
         </DepartmentContext.Provider>
     )

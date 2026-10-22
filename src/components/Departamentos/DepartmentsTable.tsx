@@ -1,14 +1,18 @@
-import { useDepartments } from "@/data/context/DepartmentsContext"
+import { useDepartments, type Department } from "@/data/context/DepartmentsContext"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import { formatDate } from "@/utils/Formater"
 import Button from "../Button"
 import { Pencil, Trash2 } from "lucide-react"
 import Pagination from "../Pagination"
 import { useState } from "react"
+import EditDepartmentDialog from "./EditDepartmentDialog"
 
 export default function DepartmentsTable() {
     const { departments } = useDepartments()
+
     const [currentPage, setCurrentPage] = useState(1)
+    const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
+    const [isOpen, setIsOpen] = useState(false)
 
     const pageSize = 5
     const currentDepartments = departments.slice((currentPage - 1) * pageSize, currentPage * pageSize)
@@ -31,6 +35,16 @@ export default function DepartmentsTable() {
         }
     }
 
+    const handleModalOpenEditting = (item: Department) => {
+        setEditingDepartment(item)
+        setIsOpen(true)
+    }
+
+    const handleModalCloseEditting = () => {
+        setEditingDepartment(null)
+        setIsOpen(false)
+    }
+
     return (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <Table >
@@ -46,14 +60,14 @@ export default function DepartmentsTable() {
                     {currentDepartments.map((department) => {
                         return (
                             <TableRow key={department.id}>
-                                <TableCell className="text-left pl-6">{department.label}</TableCell>
+                                <TableCell className="text-left pl-6">{department.name}</TableCell>
                                 <TableCell className="text-left">{formatDate(department.createdAt)}</TableCell>
                                 <TableCell className="text-right pr-6 gap-1">
                                     <Button
                                         variant="ghost"
                                         size="icon"
                                         className="h-8 w-8 text-gray-800 hover:bg-blue-50 cursor-pointer"
-                                        onClick={() => console.log("EDIT")}
+                                        onClick={() => handleModalOpenEditting(department)}
                                     >
                                         <Pencil size={16} />
                                     </Button>
@@ -83,6 +97,14 @@ export default function DepartmentsTable() {
                 handleNextPage={handleNextPage}
                 handlePreviusPage={handlePreviusPage}
             />
+
+            {editingDepartment && (
+                <EditDepartmentDialog
+                    department={editingDepartment}
+                    open={isOpen}
+                    handleModalClose={handleModalCloseEditting}
+                />
+            )}
         </div>
     )
 }
