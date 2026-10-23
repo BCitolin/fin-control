@@ -19,7 +19,7 @@ const initialErrors: DepartmentFormErrors = {
 }
 
 export function useDepartmentsForm(department?: Department, handleModalClose?: () => void) {
-    const { addDepartment, editDepartment, departments } = useDepartments()
+    const { addDepartment, deleteDepartment, departments } = useDepartments()
 
     const [isOpen, setIsOpen] = useState(false)
     const [errors, setErrors] = useState<DepartmentFormErrors>({})
@@ -74,37 +74,6 @@ export function useDepartmentsForm(department?: Department, handleModalClose?: (
         })
     }
 
-    async function handleEditSubmit(e: React.SubmitEvent) {
-        e.preventDefault()
-
-        const isValid = validate()
-        
-        if (!isValid || !department || !handleModalClose) return;
-        
-        try {
-            setIsSubmitting(true)
-
-            await new Promise((resolve) => setTimeout(resolve, 3000))
-            const payload = {
-                ...formFields,
-                name: formFields.name.trim(),
-                id: department.id,
-                createdAt: department.createdAt
-            }
-
-            await editDepartment(payload)
-
-            toast.success("Lançamento atualizado com sucesso")
-            handleModalClose()
-
-        } catch (error) {
-            toast.error("Falha ao atualizar lançamento")
-        } finally {
-            setIsSubmitting(false)
-        }
-
-    }
-
     async function handleCreateSubmit(e: React.SubmitEvent) {
         e.preventDefault()
 
@@ -125,15 +94,34 @@ export function useDepartmentsForm(department?: Department, handleModalClose?: (
 
             await addDepartment(payload)
 
-            toast.success("Lançamento criado com sucesso")
+            toast.success("Departamento criado com sucesso")
             setIsOpen(false)
 
         } catch (error) {
-            toast.error("Falha ao criar lançamento")
+            toast.error("Falha ao criar departamento")
         } finally {
             setIsSubmitting(false)
         }
     }
+
+    async function handleDeleteSubmit(e: React.SubmitEvent) {
+        e.preventDefault()
+        
+        if(!department || !handleModalClose) return
+
+        try {
+          setIsSubmitting(true)
+          await new Promise((resolve) => setTimeout(resolve, 3000))
+          const payload = department
+          await deleteDepartment(payload)
+          toast.success("Departamento excluido")
+          handleModalClose()
+        } catch (error) {
+          toast.error("Não foi possível excluir o departamento")
+        } finally {
+          setIsSubmitting(false)
+        }
+      }
 
     return ({
         isOpen,
@@ -146,6 +134,6 @@ export function useDepartmentsForm(department?: Department, handleModalClose?: (
         handleOpenChange,
         handleNameChange,
         handleCreateSubmit,
-        handleEditSubmit,
+        handleDeleteSubmit
     })
 }

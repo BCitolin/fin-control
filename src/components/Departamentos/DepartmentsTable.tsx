@@ -2,17 +2,21 @@ import { useDepartments, type Department } from "@/data/context/DepartmentsConte
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import { formatDate } from "@/utils/Formater"
 import Button from "../Button"
-import { Pencil, Trash2 } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import Pagination from "../Pagination"
 import { useState } from "react"
-import EditDepartmentDialog from "./EditDepartmentDialog"
+import DeleteDepartmentsDialog from "./DeleteDepartmentDialog"
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
+import { useTransaction } from "@/data/context/TransactionContext"
 
 export default function DepartmentsTable() {
     const { departments } = useDepartments()
+    const { realTransactions } = useTransaction()
 
     const [currentPage, setCurrentPage] = useState(1)
-    const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
+    const [deletingDepartment, setDeletingDepartment] = useState<Department | null>(null)
     const [isOpen, setIsOpen] = useState(false)
+
 
     const pageSize = 5
     const currentDepartments = departments.slice((currentPage - 1) * pageSize, currentPage * pageSize)
@@ -35,13 +39,14 @@ export default function DepartmentsTable() {
         }
     }
 
-    const handleModalOpenEditting = (item: Department) => {
-        setEditingDepartment(item)
+    const handleModalOpenDeleting = (item: Department, departmentInUse: boolean) => {
+        if(departmentInUse) return
+        setDeletingDepartment(item)
         setIsOpen(true)
     }
 
-    const handleModalCloseEditting = () => {
-        setEditingDepartment(null)
+    const handleModalCloseDeleting = () => {
+        setDeletingDepartment(null)
         setIsOpen(false)
     }
 
@@ -58,27 +63,37 @@ export default function DepartmentsTable() {
 
                 <TableBody>
                     {currentDepartments.map((department) => {
+                        const departmentInUse = (!!realTransactions.find((t) => t.department === department.name))
+
                         return (
                             <TableRow key={department.id}>
                                 <TableCell className="text-left pl-6">{department.name}</TableCell>
                                 <TableCell className="text-left">{formatDate(department.createdAt)}</TableCell>
-                                <TableCell className="text-right pr-6 gap-1">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-gray-800 hover:bg-blue-50 cursor-pointer"
-                                        onClick={() => handleModalOpenEditting(department)}
-                                    >
-                                        <Pencil size={16} />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                                        onClick={() => console.log("DELETE")}
-                                    >
-                                        <Trash2 size={16} />
-                                    </Button>
+                                <TableCell className="text-right pr-11">
+
+                                    {/* BOTAO DESABILITADO + TOOLTIP PARA OS DEPARTAMENTOS EM USO */}
+                                    <Tooltip>
+                                        <TooltipTrigger
+                                            render={
+                                                <span className="inline-block w-fit">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                                                        onClick={() => handleModalOpenDeleting(department, departmentInUse)}
+                                                        disabled={departmentInUse}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </Button>
+                                                </span>
+                                            }
+                                        />
+                                        {departmentInUse &&
+                                            <TooltipContent side="left">
+                                                <p>Este departamento possui lançamentos associados e não pode ser excluído.</p>
+                                            </TooltipContent>
+                                        }
+                                    </Tooltip>
                                 </TableCell>
                             </TableRow>
                         )
@@ -98,13 +113,15 @@ export default function DepartmentsTable() {
                 handlePreviusPage={handlePreviusPage}
             />
 
-            {editingDepartment && (
-                <EditDepartmentDialog
-                    department={editingDepartment}
-                    open={isOpen}
-                    handleModalClose={handleModalCloseEditting}
-                />
-            )}
-        </div>
+            {
+                deletingDepartment && (
+                    <DeleteDepartmentsDialog
+                        department={deletingDepartment}
+                        open={isOpen}
+                        handleModalClose={handleModalCloseDeleting}
+                    />
+                )
+            }
+        </div >
     )
 }
