@@ -2,7 +2,6 @@ import { Search, CalendarDays } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { useEffect, useState } from "react";
 import { CATEGORIES } from "@/constants/categories";
-import { DEPARTMENTS } from "@/constants/departments";
 import { useTransaction } from "@/data/context/TransactionContext";
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -12,6 +11,7 @@ import { ptBR } from "date-fns/locale"
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useDepartments } from "@/data/context/DepartmentsContext";
 
 export default function TransactionsFilter() {
 
@@ -26,6 +26,7 @@ export default function TransactionsFilter() {
 
     const debounceValue = useDebounce(searchDescription, 300)
     const { filterTransactions, filters } = useTransaction()
+    const { departments } = useDepartments()
 
     function handleTypeChange(newType: string) {
         //Código necessário para filtrar e atualizar a lista de transações no Context
@@ -229,8 +230,8 @@ export default function TransactionsFilter() {
                     </SelectTrigger>
                     <SelectContent className="w-auto min-w-[var(--radix-select-trigger-width)]" alignItemWithTrigger={false}>
                         <SelectItem className="cursor-pointer" value="Todos">Todos</SelectItem>
-                        {DEPARTMENTS.map((department) => (
-                            <SelectItem key={department.value} className="cursor-pointer" value={department.value}>{department.label}</SelectItem>
+                        {departments.map((department) => (
+                            <SelectItem key={department.id} className="cursor-pointer" value={department.name}>{department.name}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
