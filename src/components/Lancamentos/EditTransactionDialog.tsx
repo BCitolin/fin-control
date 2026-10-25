@@ -26,38 +26,39 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { CATEGORIES } from "@/constants/categories"
-import { DEPARTMENTS } from "@/constants/departments"
 import { Textarea } from "../ui/textarea"
 import type { Transaction } from "@/data/context/TransactionContext"
 import { useTransactionForm } from "@/hooks/useTransactionForm"
+import { useDepartments } from "@/data/context/DepartmentsContext"
 
 
-interface EditTransactionDialogProps{
+interface EditTransactionDialogProps {
     transaction: Transaction
     open: boolean;
-    handleModalClose: () => void;    
+    handleModalClose: () => void;
 }
 
-export default function EditTransactionDialog({transaction, open, handleModalClose}: EditTransactionDialogProps){
+export default function EditTransactionDialog({ transaction, open, handleModalClose }: EditTransactionDialogProps) {
 
     const isEditing = true
-        const {
-            errors,
-            isSubmitting,
-            isCalendarOpen,
-            handleAmountChange,
-            handleCalendarOpen,
-            handleDescription,
-            handleTypeChange,
-            validateOnBlur,
-            handleEditSubmit,
-            formFields,
-            handleDateChange,
-            handleCategoryChange,
-            handleDepartmentChange
-        } = useTransactionForm(isEditing, transaction, handleModalClose)
+    const {
+        errors,
+        isSubmitting,
+        isCalendarOpen,
+        handleAmountChange,
+        handleCalendarOpen,
+        handleDescription,
+        handleTypeChange,
+        validateOnBlur,
+        handleEditSubmit,
+        formFields,
+        handleDateChange,
+        handleCategoryChange,
+        handleDepartmentChange
+    } = useTransactionForm(isEditing, transaction, handleModalClose)
+    const { departments } = useDepartments()
 
-    return(
+    return (
         <Dialog open={open} onOpenChange={handleModalClose}>
             <DialogContent className="sm:max-w-200">
                 <form onSubmit={handleEditSubmit}>
@@ -127,7 +128,7 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                                         <Calendar
                                             mode="single"
                                             selected={formFields.date}
-                                            onSelect={(date) => {handleDateChange(date as Date)}}
+                                            onSelect={(date) => { handleDateChange(date as Date) }}
                                             defaultMonth={formFields.date}
                                             locale={ptBR}
                                         />
@@ -189,9 +190,9 @@ export default function EditTransactionDialog({transaction, open, handleModalClo
                                     </SelectTrigger>
 
                                     <SelectContent>
-                                        {DEPARTMENTS.map((item) => (
-                                            <SelectItem key={item.value} value={item.value}>
-                                                {item.label}
+                                        {departments.map((item) => (
+                                            <SelectItem key={item.id} value={item.name}>
+                                                {item.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

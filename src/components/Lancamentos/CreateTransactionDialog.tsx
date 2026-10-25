@@ -27,15 +27,15 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { CATEGORIES } from "@/constants/categories"
-import { DEPARTMENTS } from "@/constants/departments"
 import { Textarea } from "../ui/textarea"
 import { useTransactionForm } from "@/hooks/useTransactionForm"
+import { useDepartments } from "@/data/context/DepartmentsContext"
 
-interface DialogTriggerStyleProps{
+interface DialogTriggerStyleProps {
     dialogTriggerStyle?: string
 }
 
-export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTriggerStyleProps) {
+export default function CreateTransactionDialog({ dialogTriggerStyle }: DialogTriggerStyleProps) {
     const isEditing = false
     const {
         errors,
@@ -54,6 +54,8 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
         handleCategoryChange,
         handleDepartmentChange
     } = useTransactionForm(isEditing)
+
+    const { departments } = useDepartments()
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -126,7 +128,7 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                                         <Calendar
                                             mode="single"
                                             selected={formFields.date}
-                                            onSelect={(date) => {handleDateChange(date as Date)}}
+                                            onSelect={(date) => { handleDateChange(date as Date) }}
                                             defaultMonth={formFields.date}
                                             locale={ptBR}
                                         />
@@ -188,9 +190,9 @@ export default function CreateTransactionDialog({dialogTriggerStyle}: DialogTrig
                                     </SelectTrigger>
 
                                     <SelectContent>
-                                        {DEPARTMENTS.map((item) => (
-                                            <SelectItem className="cursor-pointer" key={item.value} value={item.value}>
-                                                {item.label}
+                                        {departments.map((item) => (
+                                            <SelectItem className="cursor-pointer" key={item.id} value={item.name}>
+                                                {item.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
