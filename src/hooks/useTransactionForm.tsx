@@ -4,7 +4,6 @@ import { maskCurrency } from "@/utils/Formater"
 import { toast } from 'sonner'
 import { type Transaction } from "@/data/context/TransactionContext"
 
-
 interface InitialValuesType {
     date: Date | undefined,
     type: "INCOME" | "EXPENSE",

@@ -14,7 +14,7 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
 import { FieldLabel } from "../ui/field"
-import { CircleArrowUp, CircleArrowDown, CalendarDays } from "lucide-react"
+import { CircleArrowUp, CircleArrowDown, CalendarDays, Plus } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
@@ -30,6 +30,7 @@ import { CATEGORIES } from "@/constants/categories"
 import { Textarea } from "../ui/textarea"
 import { useTransactionForm } from "@/hooks/useTransactionForm"
 import { useDepartments } from "@/data/context/DepartmentsContext"
+import { Link } from "react-router-dom"
 
 interface DialogTriggerStyleProps {
     dialogTriggerStyle?: string
@@ -189,12 +190,23 @@ export default function CreateTransactionDialog({ dialogTriggerStyle }: DialogTr
                                         <SelectValue placeholder="Selecione" />
                                     </SelectTrigger>
 
-                                    <SelectContent>
-                                        {departments.map((item) => (
-                                            <SelectItem className="cursor-pointer" key={item.id} value={item.name}>
-                                                {item.name}
-                                            </SelectItem>
-                                        ))}
+                                    <SelectContent alignItemWithTrigger={false}>
+                                        {departments.length > 0 && (
+                                            departments.map((item) => (
+                                                <SelectItem className="cursor-pointer" key={item.id} value={item.name}>
+                                                    {item.name}
+                                                </SelectItem>
+                                            ))
+                                        )}
+                                        <div className="p-1">
+                                            <Link
+                                                to="/departamentos"
+                                                className="flex w-auto items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
+                                            >
+                                                <Plus size={16} />
+                                                <span>Novo departamento...</span>
+                                            </Link>
+                                        </div>
                                     </SelectContent>
                                 </Select>
                                 {errors.department && <p className="text-xs text-red-500 mt-1">{errors.department}</p>}
