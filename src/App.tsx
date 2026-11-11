@@ -3,8 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Dashboard from "./pages/Dashboard/Index"
 import Lancamentos from "./pages/Lancamentos"
 import Departments from "./pages/Departamentos"
-
-const Categorias = () => <div>Tela Categorias</div>
+import Categories from "./pages/Categorias"
 const Dashboard2 = () => <div>Dashboard2</div>
 
 function App() {
@@ -16,7 +15,7 @@ function App() {
           <Route path="/dashboard/dashboard2" element={<Dashboard2/>}/>
           <Route path="lancamentos" element={<Lancamentos />} />
           <Route path="departamentos" element={<Departments/>} />
-          <Route path="categorias" element={<Categorias />} />
+          <Route path="categorias" element={<Categories />} />
         </Route>
       </Routes>
     </BrowserRouter>
