@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/Sidebar"
 import { Header } from "@/components/Header"
 import { TransactionProvider } from "@/data/context/TransactionContext"
 import { DepartmentsProvider } from "@/data/context/DepartmentsContext"
+import { CategoriesProvider } from "@/data/context/CategoriesContext"
 import { Toaster } from "sonner"
 import { TooltipProvider } from "./ui/tooltip"
 
@@ -20,11 +21,14 @@ export default function Layout() {
                 {/* Conteúdo Principal */}
                 <main className="flex-1 overflow-y-auto p-6">
                     <TooltipProvider>
-                        <DepartmentsProvider>
-                            <TransactionProvider>
-                                <Outlet />
-                            </TransactionProvider>
-                        </DepartmentsProvider>
+                        <CategoriesProvider>
+                            <DepartmentsProvider>
+                                <TransactionProvider>
+                                    <Outlet />
+                                </TransactionProvider>
+                            </DepartmentsProvider>
+                        </CategoriesProvider>
+
                     </TooltipProvider>
 
                 </main>
