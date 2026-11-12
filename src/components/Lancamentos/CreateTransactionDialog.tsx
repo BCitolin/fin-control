@@ -26,7 +26,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { CATEGORIES } from "@/constants/categories"
+import { useCategories } from "@/data/context/CategoriesContext"
 import { Textarea } from "../ui/textarea"
 import { useTransactionForm } from "@/hooks/useTransactionForm"
 import { useDepartments } from "@/data/context/DepartmentsContext"
@@ -57,6 +57,7 @@ export default function CreateTransactionDialog({ dialogTriggerStyle }: DialogTr
     } = useTransactionForm(isEditing)
 
     const { departments } = useDepartments()
+    const { realCategories } = useCategories()
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -169,10 +170,13 @@ export default function CreateTransactionDialog({ dialogTriggerStyle }: DialogTr
                                         <SelectValue placeholder="Selecione" />
                                     </SelectTrigger>
 
-                                    <SelectContent>
-                                        {CATEGORIES[formFields.type].map((item) => (
-                                            <SelectItem key={item.value} value={item.value} className="cursor-pointer">
-                                                {item.label}
+                                    <SelectContent alignItemWithTrigger={false}>
+                                        {realCategories.filter((category) => (category.type === formFields.type)).map((item) => (
+                                            <SelectItem
+                                                key={item.id}
+                                                value={item.name}
+                                            >
+                                                {item.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
