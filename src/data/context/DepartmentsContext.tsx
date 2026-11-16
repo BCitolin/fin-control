@@ -23,7 +23,7 @@ export function DepartmentsProvider({ children }: { children: React.ReactNode })
     ])
 
     function addDepartment(payload: Department) {
-        setDepartments((prevTransactions) => ([...prevTransactions, payload]))
+        setDepartments((prevDepartments) => ([...prevDepartments, payload]))
     }
 
     function deleteDepartment(payload: Department) {
