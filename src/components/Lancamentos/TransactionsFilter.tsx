@@ -1,7 +1,7 @@
 import { Search, CalendarDays } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { useEffect, useState } from "react";
-import { CATEGORIES } from "@/constants/categories";
+import { useCategories } from "@/data/context/CategoriesContext";
 import { useTransaction } from "@/data/context/TransactionContext";
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -27,6 +27,7 @@ export default function TransactionsFilter() {
     const debounceValue = useDebounce(searchDescription, 300)
     const { filterTransactions, filters } = useTransaction()
     const { departments } = useDepartments()
+    const { realCategories } = useCategories()
 
     function handleTypeChange(newType: string) {
         //Código necessário para filtrar e atualizar a lista de transações no Context
@@ -203,14 +204,9 @@ export default function TransactionsFilter() {
                         alignItemWithTrigger={false}
                     >
                         <SelectItem className="cursor-pointer" value="Todos">Todos</SelectItem>
-                        {CATEGORIES.EXPENSE.map((expense) => (
-                            <SelectItem key={expense.value} value={expense.value} className="cursor-pointer">
-                                {expense.label}
-                            </SelectItem>
-                        ))}
-                        {CATEGORIES.INCOME.map((income) => (
-                            <SelectItem key={income.value} className="cursor-pointer" value={income.value}>
-                                {income.label}
+                        {realCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.name} className="cursor-pointer">
+                                {category.name}
                             </SelectItem>
                         ))}
                     </SelectContent>

@@ -25,7 +25,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { CATEGORIES } from "@/constants/categories"
+import { useCategories } from "@/data/context/CategoriesContext"
 import { Textarea } from "../ui/textarea"
 import type { Transaction } from "@/data/context/TransactionContext"
 import { useTransactionForm } from "@/hooks/useTransactionForm"
@@ -57,6 +57,7 @@ export default function EditTransactionDialog({ transaction, open, handleModalCl
         handleDepartmentChange
     } = useTransactionForm(isEditing, transaction, handleModalClose)
     const { departments } = useDepartments()
+    const { realCategories } = useCategories()
 
     return (
         <Dialog open={open} onOpenChange={handleModalClose}>
@@ -168,10 +169,13 @@ export default function EditTransactionDialog({ transaction, open, handleModalCl
                                         <SelectValue placeholder="Selecione" />
                                     </SelectTrigger>
 
-                                    <SelectContent>
-                                        {CATEGORIES[formFields.type].map((item) => (
-                                            <SelectItem key={item.value} value={item.value}>
-                                                {item.label}
+                                    <SelectContent alignItemWithTrigger={false}>
+                                        {realCategories.filter((category) => (category.type === formFields.type)).map((item) => (
+                                            <SelectItem
+                                                key={item.id}
+                                                value={item.name}
+                                            >
+                                                {item.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
