@@ -1,5 +1,4 @@
 import { useDepartments, type Department } from "@/data/context/DepartmentsContext"
-import { TableCell, TableRow } from "../ui/table"
 import { formatDate } from "@/utils/Formater"
 import Button from "../Button"
 import { Trash2 } from "lucide-react"
@@ -8,11 +7,44 @@ import DeleteDepartmentsDialog from "./DeleteDepartmentDialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 import { useTransaction } from "@/data/context/TransactionContext"
 import { usePagination } from "@/hooks/usePagination"
-import DataTable from "../DataTable"
+import DataTable, { type ColumnDef } from "../DataTable"
 
 export default function DepartmentsTable() {
-    const label = "departamentos"
-    const columns = ["Nome", "Criado em", "Ações"]
+    const columns: ColumnDef<Department>[] = [
+        { id: "name", header: "Nome", cell: (row) => row.name },
+        { id: "creadetAt", header: "Criado em", cell: (row) => formatDate(row.createdAt) },
+        {
+            id: "actions",
+            header: "Ações",
+            cell: (row) => {
+                const departmentInUse = (!!realTransactions.find((t) => t.department === row.name))
+                return (
+                    <Tooltip>
+                        <TooltipTrigger
+                            render={
+                                <span className="inline-block w-fit">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                                        onClick={() => handleModalOpenDeleting(row, departmentInUse)}
+                                        disabled={departmentInUse}
+                                    >
+                                        <Trash2 size={16} />
+                                    </Button>
+                                </span>
+                            }
+                        />
+                        {departmentInUse &&
+                            <TooltipContent side="left">
+                                <p>Este departamento possui lançamentos associados e não pode ser excluído.</p>
+                            </TooltipContent>
+                        }
+                    </Tooltip>
+                )
+            }
+        }
+    ]
 
     const { departments } = useDepartments()
     const { realTransactions } = useTransaction()
@@ -45,7 +77,9 @@ export default function DepartmentsTable() {
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <DataTable
                 columns={columns}
-                label={label}
+                label="departamentos"
+                data={currentItems}
+                getRowId={(row) => row.id}
                 currentPage={currentPage}
                 endItem={endItem}
                 handleNextPage={handleNextPage}
@@ -53,42 +87,7 @@ export default function DepartmentsTable() {
                 startItem={startItem}
                 totalItems={totalItems}
                 totalPages={totalPages}
-            >
-                {currentItems.map((department) => {
-                    const departmentInUse = (!!realTransactions.find((t) => t.department === department.name))
-                    return (
-                        <TableRow key={department.id}>
-                            <TableCell className="text-center">{department.name}</TableCell>
-                            <TableCell className="text-center">{formatDate(department.createdAt)}</TableCell>
-                            <TableCell className="text-center">
-                                <Tooltip>
-                                    <TooltipTrigger
-                                        render={
-                                            <span className="inline-block w-fit">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                                                    onClick={() => handleModalOpenDeleting(department, departmentInUse)}
-                                                    disabled={departmentInUse}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </Button>
-                                            </span>
-                                        }
-                                    />
-                                    {departmentInUse &&
-                                        <TooltipContent side="left">
-                                            <p>Este departamento possui lançamentos associados e não pode ser excluído.</p>
-                                        </TooltipContent>
-                                    }
-                                </Tooltip>
-                            </TableCell>
-                        </TableRow>
-                    )
-                })}
-            </DataTable>
-
+            />
             {
                 deletingDepartment && (
                     <DeleteDepartmentsDialog

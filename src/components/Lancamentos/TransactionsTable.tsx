@@ -1,4 +1,3 @@
-import { TableRow, TableCell } from "../ui/table";
 import { formatCurrency, formatDate } from "@/utils/Formater";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -8,11 +7,70 @@ import { useState } from "react";
 import EditTransactionDialog from "./EditTransactionDialog";
 import DeleteTransactionDialog from "./DeleteTransactionDialog";
 import { usePagination } from "@/hooks/usePagination";
-import DataTable from "../DataTable";
+import DataTable, { type ColumnDef } from "../DataTable";
 
 export default function TransactionsTable() {
-    const label = "lançamentos"
-    const columns = ["Data", "Descrição", "Categoria", "Departamento", "Tipo", "Valor", "Ações"]
+    const columns: ColumnDef<Transaction>[] = [
+        { id: "date", header: "Data", cell: (row) => formatDate(row.date) },
+        { id: "description", header: "Descrição", cell: (row) => row.description },
+        { id: "category", header: "Categoria", cell: (row) => row.category },
+        { id: "department", header: "Departamento", cell: (row) => row.department },
+        {
+            id: "type",
+            header: "Tipo",
+            cell: (row) => {
+                const isIncome = row.type === "INCOME"
+                return (
+                    <Badge
+                        variant="outline"
+                        className={isIncome ?
+                            "bg-green-50 text-green-700 border-green-200 hover:bg-green-50"
+                            : "bg-red-50 text-red-700 border-red-200 hover:bg-red-50"
+                        }
+                    >
+                        {isIncome ? "Receita" : "Despesa"}
+                    </Badge>
+                )
+            }
+        },
+        {
+            id: "amount",
+            header: "Valor",
+            cell: (row) => (
+                <span
+                    className={`text-center ${row.type == "EXPENSE" ?
+                        "text-red-800"
+                        : "text-green-800"}`}
+                >
+                    {formatCurrency(row.amount as number, row.type)}
+                </span>
+            )
+        },
+        {
+            id: "actions",
+            header: "Ações",
+            cell: (row) => (
+                <>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-gray-800 hover:bg-blue-50 cursor-pointer"
+                        onClick={() => handleModalOpenEditting(row)}
+                    >
+                        <Pencil size={16} />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                        onClick={() => handleModalOpenDeletting(row)}
+                    >
+                        <Trash2 size={16} />
+                    </Button>
+                </>
+            )
+        }
+    ]
 
     const { transactions } = useTransaction()
     const {
@@ -52,9 +110,12 @@ export default function TransactionsTable() {
 
     return (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <DataTable 
-                columns={columns} 
-                label={label}
+            <DataTable
+                columns={columns}
+                data={currentItems}
+                getRowId={(row) => row.id}
+                emptyMessage="Nenhum lançamento encontrado"
+                label="lançamentos"
                 currentPage={currentPage}
                 endItem={endItem}
                 handleNextPage={handleNextPage}
@@ -62,63 +123,7 @@ export default function TransactionsTable() {
                 startItem={startItem}
                 totalItems={totalItems}
                 totalPages={totalPages}
-            >
-                {currentItems.length > 0 ? (currentItems.map((item) => {
-                        const isIncome = item.type === 'INCOME'
-                        return (
-                            <TableRow key={item.id}>
-                                <TableCell className="text-center">{formatDate(item.date)}</TableCell>
-                                <TableCell className="text-center">{item.description}</TableCell>
-                                <TableCell className="text-center">{item.category}</TableCell>
-                                <TableCell className="text-center">{item.department}</TableCell>
-                                <TableCell className="text-center">
-                                    <Badge
-                                        variant="outline"
-                                        className={isIncome ?
-                                            "bg-green-50 text-green-700 border-green-200 hover:bg-green-50"
-                                            : "bg-red-50 text-red-700 border-red-200 hover:bg-red-50"
-                                        }
-                                    >
-                                        {isIncome ? "Receita" : "Despesa"}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell
-                                    className={`text-center ${item.type == "EXPENSE" ?
-                                        "text-red-800"
-                                        : "text-green-800"}`}
-                                >
-                                    {formatCurrency(item.amount as number, item.type)}
-                                </TableCell>
-                                <TableCell className="text-center gap-1">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-gray-800 hover:bg-blue-50 cursor-pointer"
-                                        onClick={() => handleModalOpenEditting(item)}
-                                    >
-                                        <Pencil size={16} />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                                        onClick={() => handleModalOpenDeletting(item)}
-                                    >
-                                        <Trash2 size={16} />
-                                    </Button>
-                                </TableCell>
-                            </TableRow>)
-                    }))
-                        :
-                        (
-                            <TableRow>
-                                <TableCell colSpan={7} className="h-30 text-center text-muted-foreground">
-                                    Nenhum lançamento encontrado.
-                                </TableCell>
-                            </TableRow>
-                        )
-                    }
-            </DataTable>
+            />
 
             {editingTransaction && (
                 <EditTransactionDialog
