@@ -1,6 +1,7 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { toast } from 'sonner'
 import { useCategories, type Category } from "@/data/context/CategoriesContext"
+import { useTransaction, type UpdateTransactionsCategoryProps } from "@/data/context/TransactionContext"
 
 interface InitialValuesType {
     name: string
@@ -22,8 +23,9 @@ const initialErrors: CategoriesFormErrors = {
     type: ""
 }
 
-export function useCategoriesForm(category?: Category, handleModalClose?: () => void) {
+export function useCategoriesForm(isEditing: boolean, categoryInUse?: boolean, category?: Category,  handleModalClose?: () => void) {
     const { addCategory, deleteCategory, editCategory, realCategories } = useCategories()
+    const {updateTransactionsCategory} = useTransaction()
 
     const [isOpen, setIsOpen] = useState(false)
     const [errors, setErrors] = useState<CategoriesFormErrors>({})
@@ -56,8 +58,9 @@ export function useCategoriesForm(category?: Category, handleModalClose?: () => 
             newErrors.name = "O nome não pode ficar vazio"
         } else if (formFields.name.length < 2) {
             newErrors.name = "O nome deve ter pelo menos 2 caracteres"
-        } else if(findCategory){
+        } else if(findCategory ? findCategory.id !== category?.id : findCategory){
             newErrors.name = "Essa categoria já existe"
+            console.log(findCategory)
         }
 
         if(!formFields.type) {
@@ -118,8 +121,38 @@ export function useCategoriesForm(category?: Category, handleModalClose?: () => 
 
     async function handleEditSubmit(e: React.SubmitEvent){
         e.preventDefault()
+        const isValid = validate()
 
+        if(!category || !handleModalClose || !isValid) return
 
+        try {
+            setIsSubmitting(true)
+
+            await new Promise((resolve) => setTimeout(resolve, 3000))
+            const payload = {
+                ...formFields,
+                name: formFields.name.trim(),
+                type: categoryInUse ? category.type : formFields.type,
+                id: category.id,
+                createdAt: category.createdAt
+            }
+
+            const updateTransactionsPayload: UpdateTransactionsCategoryProps = {
+                newName: formFields.name,
+                prevName: category.name
+            }
+
+            await editCategory(payload)
+            await updateTransactionsCategory(updateTransactionsPayload)
+
+            toast.success("Categoria editada com sucesso")
+            handleModalClose()
+
+        } catch (error) {
+            toast.error("Falha ao editar categoria")
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     async function handleDeleteSubmit(e: React.SubmitEvent) {
@@ -141,6 +174,15 @@ export function useCategoriesForm(category?: Category, handleModalClose?: () => 
         }
       }
 
+      useEffect(() => {
+        if(category && isEditing){
+            setFormFields({
+                name: category.name,
+                type: category.type
+            })
+        }
+      }, [category, isEditing])
+
     return ({
         isOpen,
         errors,
@@ -153,6 +195,7 @@ export function useCategoriesForm(category?: Category, handleModalClose?: () => 
         handleNameChange,
         handleTypeChange,
         handleCreateSubmit,
+        handleEditSubmit,
         handleDeleteSubmit
     })
 }

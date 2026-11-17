@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState} from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 
 // Define o que será aceito
 export interface Transaction {
@@ -21,6 +21,11 @@ export interface TransactionFilters {
     searchDescription: string
 }
 
+export interface UpdateTransactionsCategoryProps {
+    prevName: string
+    newName: string
+}
+
 // Define o que vai receber quem chamar esse contexto
 interface TransactionContentType {
     transactions: Transaction[];
@@ -30,6 +35,7 @@ interface TransactionContentType {
     editTransaction: (payload: Transaction) => void
     deleteTransaction: (payload: Transaction) => void
     filterTransactions: (filters: TransactionFilters) => void
+    updateTransactionsCategory: (payload: UpdateTransactionsCategoryProps) => void
 }
 
 const TransactionContext = createContext<TransactionContentType | undefined>(undefined)
@@ -43,30 +49,36 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
         startDate: undefined,
         endDate: undefined,
         searchDescription: ""
-    }) 
-    
-    function addTransaction(payload: Transaction){
-        setTransactions((prevTransactions)=> ([...prevTransactions, payload]))
+    })
+
+    function addTransaction(payload: Transaction) {
+        setTransactions((prevTransactions) => ([...prevTransactions, payload]))
     }
 
-    function editTransaction(payload: Transaction){
+    function editTransaction(payload: Transaction) {
         setTransactions((prev) =>
             prev.map((t) => t.id === payload.id ? payload : t)
         )
     }
 
-    function deleteTransaction(payload: Transaction){
-        setTransactions((prev) => 
+    function deleteTransaction(payload: Transaction) {
+        setTransactions((prev) =>
             prev.filter(t => t.id !== payload.id)
         )
     }
 
-    function filterTransactions(newFilter: TransactionFilters){
-        setFilters((prev) => ({...prev, ...newFilter}))
+    function filterTransactions(newFilter: TransactionFilters) {
+        setFilters((prev) => ({ ...prev, ...newFilter }))
     }
 
-    const filteredTransactions = useMemo(()=>{
-        return transactions.filter((transaction)=>{
+    function updateTransactionsCategory(payload: UpdateTransactionsCategoryProps) {
+        setTransactions((prevTransactions) => 
+            prevTransactions.map((transaction) => 
+                transaction.category === payload.prevName ? {...transaction, category: payload.newName} : {...transaction}))
+    }
+
+    const filteredTransactions = useMemo(() => {
+        return transactions.filter((transaction) => {
             const normalizeSearch = filters.searchDescription.trim().toLowerCase()
             const normalizeDescription = transaction.description.toLowerCase()
 
@@ -82,7 +94,7 @@ export function TransactionProvider({ children }: { children: React.ReactNode })
     }, [filters, transactions])
 
     return (
-        <TransactionContext.Provider value={{ transactions: filteredTransactions, realTransactions: transactions, addTransaction, editTransaction, deleteTransaction, filterTransactions, filters }}>
+        <TransactionContext.Provider value={{ transactions: filteredTransactions, realTransactions: transactions, addTransaction, editTransaction, deleteTransaction, updateTransactionsCategory, filterTransactions, filters }}>
             {children}
         </TransactionContext.Provider>
     )
