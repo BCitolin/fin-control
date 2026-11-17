@@ -21,6 +21,8 @@ interface DialogTriggerStyleProps {
 }
 
 export default function CreateCategoryDialog({ dialogTriggerStyle }: DialogTriggerStyleProps) {
+    const isEditing = false
+
     const {
         isOpen,
         errors,
@@ -31,7 +33,7 @@ export default function CreateCategoryDialog({ dialogTriggerStyle }: DialogTrigg
         handleNameChange,
         handleTypeChange,
         handleCreateSubmit
-    } = useCategoriesForm()
+    } = useCategoriesForm(isEditing)
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>

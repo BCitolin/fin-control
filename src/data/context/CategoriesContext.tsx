@@ -25,10 +25,10 @@ const CategoryContext = createContext<CategoryContentType | undefined>(undefined
 
 export function CategoriesProvider({ children }: { children: React.ReactNode }) {
     const [categories, setCategories] = useState<Category[]>([
-        {id: crypto.randomUUID(), name: "Vendas", type: "INCOME", createdAt: new Date() },
-        {id: crypto.randomUUID(), name: "Consultoria", type: "INCOME", createdAt: new Date() },
-        {id: crypto.randomUUID(), name: "Software / Assinaturas", type: "EXPENSE", createdAt: new Date() },
-        {id: crypto.randomUUID(), name: "Marketing / Anúncios", type: "EXPENSE", createdAt: new Date() }
+        { id: crypto.randomUUID(), name: "Vendas", type: "INCOME", createdAt: new Date() },
+        { id: crypto.randomUUID(), name: "Consultoria", type: "INCOME", createdAt: new Date() },
+        { id: crypto.randomUUID(), name: "Software / Assinaturas", type: "EXPENSE", createdAt: new Date() },
+        { id: crypto.randomUUID(), name: "Marketing / Anúncios", type: "EXPENSE", createdAt: new Date() }
     ])
 
     const [categoriesFilters, setCategoriesFilters] = useState<CategoriesFilter>({
@@ -39,22 +39,24 @@ export function CategoriesProvider({ children }: { children: React.ReactNode }) 
         setCategories((prevCategories) => ([...prevCategories, payload]))
     }
 
-    function editCategory(payload: Category){
-
+    function editCategory(payload: Category) {
+        setCategories((prev) =>
+            prev.map((c) => c.id === payload.id ? payload : c)
+        )
     }
 
     function deleteCategory(payload: Category) {
-    
+
     }
 
-    function filterCategories(newFilter: CategoriesFilter){
-        setCategoriesFilters((prev) => ({...prev, ...newFilter}))
+    function filterCategories(newFilter: CategoriesFilter) {
+        setCategoriesFilters((prev) => ({ ...prev, ...newFilter }))
     }
 
-    const filteredCategories = useMemo(() =>{
+    const filteredCategories = useMemo(() => {
         return categories.filter((categorie) => {
             const filteredType = categoriesFilters.type === "" || categorie.type === categoriesFilters.type;
-             return filteredType
+            return filteredType
         })
     }, [categoriesFilters, categories])
 
