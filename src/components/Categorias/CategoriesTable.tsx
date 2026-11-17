@@ -5,8 +5,10 @@ import { formatDate } from "@/utils/Formater";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import Button from "../Button";
 import { Badge } from "../ui/badge";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useTransaction } from "@/data/context/TransactionContext";
+import { useState } from "react";
+import EditCategoryDialog from "./EditCategoryDialog";
 
 export default function CategoriesTable() {
     const columns: ColumnDef<Category>[] = [
@@ -33,28 +35,39 @@ export default function CategoriesTable() {
             cell: (row) => {
                 const categoryInUse = (!!realTransactions.find((t) => t.category === row.name))
                 return (
-                    <Tooltip>
-                        <TooltipTrigger
-                            render={
-                                <span className="inline-block w-fit">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                                        //onClick={() => handleModalOpenDeleting(department, categoryInUse)}
-                                        disabled={categoryInUse}
-                                    >
-                                        <Trash2 size={16} />
-                                    </Button>
-                                </span>
+                    <>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-800 hover:bg-blue-50 cursor-pointer"
+                            onClick={() => handleModalOpenEditing(row)}
+                        >
+                            <Pencil size={16} />
+                        </Button>
+                        <Tooltip>
+                            <TooltipTrigger
+                                render={
+                                    <span className="inline-block w-fit">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                                            //onClick={() => handleModalOpenDeleting(department, categoryInUse)}
+                                            disabled={categoryInUse}
+                                        >
+                                            <Trash2 size={16} />
+                                        </Button>
+                                    </span>
+                                }
+                            />
+                            {categoryInUse &&
+                                <TooltipContent side="left">
+                                    <p>Esta categoria possui lançamentos associados e não pode ser excluída.</p>
+                                </TooltipContent>
                             }
-                        />
-                        {categoryInUse &&
-                            <TooltipContent side="left">
-                                <p>Esta categoria possui lançamentos associados e não pode ser excluída.</p>
-                            </TooltipContent>
-                        }
-                    </Tooltip>
+                        </Tooltip>
+                    </>
+
                 )
             }
         }
@@ -73,20 +86,43 @@ export default function CategoriesTable() {
         endItem
     } = usePagination(categories)
 
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+    const [isOpen, setIsOpen] = useState(false)
+
+    function handleModalOpenEditing(category: Category) {
+        setEditingCategory(category)
+        setIsOpen(true)
+    }
+
+    function handleModalCloseEditting() {
+        setEditingCategory(null)
+        setIsOpen(false)
+    }
+
     return (
-        <DataTable
-            columns={columns}
-            label="categorias"
-            data={currentItems}
-            getRowId={(row) => row.id}
-            emptyMessage="Nenhuma categoria encontrada"
-            currentPage={currentPage}
-            endItem={endItem}
-            handleNextPage={handleNextPage}
-            handlePreviousPage={handlePreviousPage}
-            startItem={startItem}
-            totalItems={totalItems}
-            totalPages={totalPages}
-        />            
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <DataTable
+                columns={columns}
+                label="categorias"
+                data={currentItems}
+                getRowId={(row) => row.id}
+                emptyMessage="Nenhuma categoria encontrada"
+                currentPage={currentPage}
+                endItem={endItem}
+                handleNextPage={handleNextPage}
+                handlePreviousPage={handlePreviousPage}
+                startItem={startItem}
+                totalItems={totalItems}
+                totalPages={totalPages}
+            />
+
+            {editingCategory && (
+                <EditCategoryDialog
+                    category={editingCategory}
+                    open={isOpen}
+                    handleModalClose={handleModalCloseEditting}
+                />
+            )}
+        </div>
     )
 }
