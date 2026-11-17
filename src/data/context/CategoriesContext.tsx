@@ -25,10 +25,10 @@ const CategoryContext = createContext<CategoryContentType | undefined>(undefined
 
 export function CategoriesProvider({ children }: { children: React.ReactNode }) {
     const [categories, setCategories] = useState<Category[]>([
-        { id: crypto.randomUUID(), name: "Vendas", type: "INCOME", createdAt: new Date() },
-        { id: crypto.randomUUID(), name: "Consultoria", type: "INCOME", createdAt: new Date() },
-        { id: crypto.randomUUID(), name: "Software / Assinaturas", type: "EXPENSE", createdAt: new Date() },
-        { id: crypto.randomUUID(), name: "Marketing / Anúncios", type: "EXPENSE", createdAt: new Date() }
+        // { id: crypto.randomUUID(), name: "Vendas", type: "INCOME", createdAt: new Date() },
+        // { id: crypto.randomUUID(), name: "Consultoria", type: "INCOME", createdAt: new Date() },
+        // { id: crypto.randomUUID(), name: "Software / Assinaturas", type: "EXPENSE", createdAt: new Date() },
+        // { id: crypto.randomUUID(), name: "Marketing / Anúncios", type: "EXPENSE", createdAt: new Date() }
     ])
 
     const [categoriesFilters, setCategoriesFilters] = useState<CategoriesFilter>({
@@ -46,7 +46,9 @@ export function CategoriesProvider({ children }: { children: React.ReactNode }) 
     }
 
     function deleteCategory(payload: Category) {
-
+        setCategories((prev) => (
+            prev.filter((c) => c.id !== payload.id)
+        ))
     }
 
     function filterCategories(newFilter: CategoriesFilter) {
