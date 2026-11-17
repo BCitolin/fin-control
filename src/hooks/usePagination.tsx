@@ -6,7 +6,8 @@ import { useCategories } from "@/data/context/CategoriesContext"
 export function usePagination<T>(items: T[]) {
     const { filters, deleteTransaction } = useTransaction()
     const { deleteDepartment } = useDepartments()
-    const {categoriesFilters} = useCategories()
+    const {categoriesFilters, deleteCategory} = useCategories()
+
 
     const [currentPage, setCurrentPage] = useState(1)
     
@@ -36,7 +37,7 @@ export function usePagination<T>(items: T[]) {
 
     useEffect(() => {
         setCurrentPage(1)
-    }, [filters, categoriesFilters, deleteTransaction, deleteDepartment])
+    }, [filters, categoriesFilters, deleteTransaction, deleteDepartment, deleteCategory ])
 
     return {
         currentPage,

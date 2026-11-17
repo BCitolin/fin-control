@@ -9,6 +9,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useTransaction } from "@/data/context/TransactionContext";
 import { useState } from "react";
 import EditCategoryDialog from "./EditCategoryDialog";
+import DeleteCategoryDialog from "./DeleteCategoryDialog";
 
 export default function CategoriesTable() {
     const columns: ColumnDef<Category>[] = [
@@ -52,7 +53,7 @@ export default function CategoriesTable() {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                                            //onClick={() => handleModalOpenDeleting(department, categoryInUse)}
+                                            onClick={() => handleModalOpenDeleting(row, categoryInUse)}
                                             disabled={categoryInUse}
                                         >
                                             <Trash2 size={16} />
@@ -87,6 +88,8 @@ export default function CategoriesTable() {
     } = usePagination(categories)
 
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+    const [deletingCategory, setDelettingCategory] = useState<Category | null>(null)
+    const [categoryInUse, setCategoryInUse] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
 
     function handleModalOpenEditing(category: Category) {
@@ -96,6 +99,18 @@ export default function CategoriesTable() {
 
     function handleModalCloseEditting() {
         setEditingCategory(null)
+        setIsOpen(false)
+    }
+
+    const handleModalOpenDeleting = (item: Category, categoryInUse: boolean) => {
+        setDelettingCategory(item)
+        setCategoryInUse(categoryInUse)
+        setIsOpen(true)
+    }
+
+    const handleModalCloseDeleting = () => {
+        setDelettingCategory(null)
+        setCategoryInUse(false)
         setIsOpen(false)
     }
 
@@ -121,6 +136,15 @@ export default function CategoriesTable() {
                     category={editingCategory}
                     open={isOpen}
                     handleModalClose={handleModalCloseEditting}
+                />
+            )}
+
+            {deletingCategory && (
+                <DeleteCategoryDialog
+                    category={deletingCategory}
+                    categoryInUse={categoryInUse}
+                    handleModalClose={handleModalCloseDeleting}
+                    open={isOpen}
                 />
             )}
         </div>
